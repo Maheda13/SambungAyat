@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Tahfiz - Sambung Ayat Sempurna</title>
+    <title>Kuis Tahfiz - Sambung Ayat Pintar</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,15 +24,15 @@
         
         <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
-            <p class="font-semibold text-lg">Mengunduh Data Ayat Al-Qur'an...</p>
-            <p class="text-xs text-slate-300 mt-1">Mohon tunggu sebentar, sistem sedang menyiapkan bank soal.</p>
+            <p class="font-semibold text-lg">{{ teksLoading }}</p>
+            <p class="text-xs text-slate-300 mt-1">Sistem sedang mengoptimasi data agar kuis berjalan instan.</p>
         </div>
 
         <div v-if="layarAktif === 'dashboard'" class="w-full flex-1 flex flex-col py-4">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 class="text-2xl font-bold text-emerald-700">Tahfiz Quiz</h1>
-                    <p class="text-sm text-slate-500">Uji Hafalan Al-Qur'an</p>
+                    <p class="text-sm text-slate-500">Uji Hafalan Al-Qur'an (Offline Cache)</p>
                 </div>
                 <div class="flex gap-2">
                     <button @click="resetSemua" class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer" title="Acak Ulang">
@@ -51,7 +51,7 @@
 
             <div v-if="bankSoal.length === 0" class="text-center my-auto p-6 bg-amber-50 border border-amber-200 rounded-2xl">
                 <p class="text-amber-800 font-semibold mb-2">Belum Ada Data Soal</p>
-                <p class="text-xs text-amber-600 mb-4">Silakan buka Pengaturan (tombol ikon gerigi di atas) untuk memilih Juz dan mengunduh ayat.</p>
+                <p class="text-xs text-amber-600 mb-4">Silakan buka Pengaturan untuk memilih target Juz materi kuis.</p>
                 <button @click="tampilkanModal = true" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold text-xs shadow-sm hover:bg-amber-700">Buka Pengaturan</button>
             </div>
 
@@ -94,7 +94,7 @@
                 </div>
 
                 <div v-if="bantuanTerbuka.lanjutan" class="border-t border-dashed border-slate-200 pt-6 text-center">
-                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-4">2-3 Ayat Selanjutnya:</span>
+                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-4">Lanjutan Ayat:</span>
                     <p class="font-arabic text-2xl md:text-3xl text-emerald-700 leading-[2.5] dir-rtl" dir="rtl">
                         {{ dataSoalAktif.lanjutanAyat }}
                     </p>
@@ -157,7 +157,7 @@
                 </div>
 
                 <button @click="unduhDanSimpanPengaturan" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition cursor-pointer">
-                    Unduh Ayat & Terapkan
+                    Terapkan & Muat Materi
                 </button>
             </div>
         </div>
@@ -171,6 +171,7 @@
                 const layarAktif = ref('dashboard'); 
                 const tampilkanModal = ref(false);
                 const sedangLoading = ref(false);
+                const teksLoading = ref("Mengunduh Data Ayat Al-Qur'an...");
                 
                 const pilihanJuz = ref([30]); 
                 const modeSoal = ref('penuh');
@@ -187,12 +188,12 @@
                 const pilihSemuaJuz = () => { pilihanJuz.value = Array.from({ length: 30 }, (_, i) => i + 1); };
                 const kosongkanJuz = () => { pilihanJuz.value = []; };
 
-                // ================= FUNGSI BARU CONVERT ANGKA ARAB =================
                 const keAngkaArab = (num) => {
                     const angkaArab = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
+                // ================= LOGIKA UTAMA EFFICIENCY (CACHING SYSTEM) =================
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
@@ -205,30 +206,46 @@
                     nomorHangus.value = [];
                     soalPerNomor.value = {};
 
+                    let tampunganAyat = [];
+
                     try {
-                        const requests = pilihanJuz.value.map(juz => 
-                            fetch(`https://api.alquran.cloud/v1/juz/${juz}/quran-uthmani`).then(res => res.json())
-                        );
-                        const requestsTranslation = pilihanJuz.value.map(juz => 
-                            fetch(`https://api.alquran.cloud/v1/juz/${juz}/id.indonesian`).then(res => res.json())
-                        );
+                        for (const juz of pilihanJuz.value) {
+                            // Cek apakah data Juz ini sudah tersimpan di memori browser lokal
+                            const cacheKeyArab = `cache_juz_arab_${juz}`;
+                            const cacheKeyArti = `cache_juz_arti_${juz}`;
+                            
+                            let dataJuzArab = localStorage.getItem(cacheKeyArab);
+                            let dataJuzArti = localStorage.getItem(cacheKeyArti);
 
-                        const hasilArab = await Promise.all(requests);
-                        const hasilArti = await Promise.all(requestsTranslation);
+                            if (dataJuzArab && dataJuzArti) {
+                                // JIKA ADA DI CACHE: Langsung parsing (tidak pakai internet sama sekali)
+                                dataJuzArab = JSON.parse(dataJuzArab);
+                                dataJuzArti = JSON.parse(dataJuzArti);
+                            } else {
+                                // JIKA TIDAK ADA: Terpaksa download sekali saja via internet
+                                teksLoading.value = `Mengunduh Juz ${juz} via Internet...`;
+                                
+                                const [resArab, resArti] = await Promise.all([
+                                    fetch(`https://api.alquran.cloud/v1/juz/${juz}/quran-uthmani`).then(res => res.json()),
+                                    fetch(`https://api.alquran.cloud/v1/juz/${juz}/id.indonesian`).then(res => res.json())
+                                ]);
 
-                        let tampunganAyat = [];
+                                dataJuzArab = resArab.data.ayahs;
+                                dataJuzArti = resArti.data.ayahs;
 
-                        for (let i = 0; i < hasilArab.length; i++) {
-                            const versesArab = hasilArab[i].data.ayahs;
-                            const versesArti = hasilArti[i].data.ayahs;
+                                // Simpan ke memori browser untuk kebutuhan kuis di masa depan
+                                localStorage.setItem(cacheKeyArab, JSON.stringify(dataJuzArab));
+                                localStorage.setItem(cacheKeyArti, JSON.stringify(dataJuzArti));
+                            }
 
-                            for (let j = 0; j < versesArab.length; j++) {
+                            // Satukan data Arab dan Terjemahan ke dalam bankSoal
+                            for (let j = 0; j < dataJuzArab.length; j++) {
                                 tampunganAyat.push({
-                                    textArab: versesArab[j].text,
-                                    textArti: versesArti[j].text,
-                                    surahName: versesArab[j].surah.englishName,
-                                    verseNumber: versesArab[j].numberInSurah,
-                                    surahNumber: versesArab[j].surah.number 
+                                    textArab: dataJuzArab[j].text,
+                                    textArti: dataJuzArti[j].text,
+                                    surahName: dataJuzArab[j].surah.englishName,
+                                    verseNumber: dataJuzArab[j].numberInSurah,
+                                    surahNumber: dataJuzArab[j].surah.number 
                                 });
                             }
                         }
@@ -239,7 +256,7 @@
 
                     } catch (error) {
                         console.error(error);
-                        alert("Gagal mengunduh data Al-Qur'an. Cek koneksi internet Anda.");
+                        alert("Gagal memuat data. Jika ini pertama kali membuka Juz tersebut, Anda memerlukan internet.");
                     } finally {
                         sedangLoading.value = false;
                     }
@@ -252,16 +269,16 @@
 
                     for (let i = 1; i <= totalNomor.value; i++) {
                         let ayatDipilih = soalDiacak[i - 1];
+                        if(!ayatDipilih) break; // Antisipasi jika total soal di bank lebih kecil dari grid kuis
+                        
                         let soalTeks = '';
                         let kumpulanLanjutan = [];
 
-                        // Ambil 3 ayat setelah ayat terpilih di dalam Surat yang sama
                         for (let k = 1; k <= 3; k++) {
                             let ayatBerikutnya = bankSoal.value.find(a => 
                                 a.surahNumber === ayatDipilih.surahNumber && a.verseNumber === ayatDipilih.verseNumber + k
                             );
                             if (ayatBerikutnya) {
-                                // Menggunakan fungsi keAngkaArab() agar nomor ayatnya otentik
                                 kumpulanLanjutan.push(`${ayatBerikutnya.textArab} ﴿${keAngkaArab(ayatBerikutnya.verseNumber)}﴾`);
                             }
                         }
@@ -316,7 +333,7 @@
                 });
 
                 return {
-                    layarAktif, tampilkanModal, sedangLoading, pilihanJuz, modeSoal, totalNomor,
+                    layarAktif, tampilkanModal, sedangLoading, teksLoading, pilihanJuz, modeSoal, totalNomor,
                     nomorTerpilih, nomorHangus, bankSoal, dataSoalAktif, bantuanTerbuka,
                     pilihSemuaJuz, kosongkanJuz, unduhDanSimpanPengaturan, pilihNomor, resetSemua
                 }
