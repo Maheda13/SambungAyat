@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Tahfiz - Sambung Ayat</title>
+    <title>Kuis Tahfiz - Sambung Ayat Sempurna</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -187,6 +187,12 @@
                 const pilihSemuaJuz = () => { pilihanJuz.value = Array.from({ length: 30 }, (_, i) => i + 1); };
                 const kosongkanJuz = () => { pilihanJuz.value = []; };
 
+                // ================= FUNGSI BARU CONVERT ANGKA ARAB =================
+                const keAngkaArab = (num) => {
+                    const angkaArab = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                    return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
+                };
+
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
@@ -222,7 +228,7 @@
                                     textArti: versesArti[j].text,
                                     surahName: versesArab[j].surah.englishName,
                                     verseNumber: versesArab[j].numberInSurah,
-                                    surahNumber: versesArab[j].surah.number // Menyimpan nomor surat asli
+                                    surahNumber: versesArab[j].surah.number 
                                 });
                             }
                         }
@@ -249,14 +255,14 @@
                         let soalTeks = '';
                         let kumpulanLanjutan = [];
 
-                        // 1. Ambil 3 ayat setelah ayat terpilih di dalam Surat yang sama
+                        // Ambil 3 ayat setelah ayat terpilih di dalam Surat yang sama
                         for (let k = 1; k <= 3; k++) {
                             let ayatBerikutnya = bankSoal.value.find(a => 
                                 a.surahNumber === ayatDipilih.surahNumber && a.verseNumber === ayatDipilih.verseNumber + k
                             );
                             if (ayatBerikutnya) {
-                                // Tambahkan tanda nomor ayat di akhir teks arabnya agar rapi
-                                kumpulanLanjutan.push(`${ayatBerikutnya.textArab} ﴿${ayatBerikutnya.verseNumber}﴾`);
+                                // Menggunakan fungsi keAngkaArab() agar nomor ayatnya otentik
+                                kumpulanLanjutan.push(`${ayatBerikutnya.textArab} ﴿${keAngkaArab(ayatBerikutnya.verseNumber)}﴾`);
                             }
                         }
 
@@ -264,16 +270,14 @@
                             ? kumpulanLanjutan.join(' ') 
                             : '(Akhir Surat - Silakan lanjut ke surat berikutnya)';
 
-                        // 2. Terapkan metode pemotongan soal
                         if (modeSoal.value === 'penuh') {
                             soalTeks = ayatDipilih.textArab;
                         } else {
                             let kumpulanKata = ayatDipilih.textArab.split(' ');
                             if (kumpulanKata.length > 4) {
                                 soalTeks = kumpulanKata.slice(0, 3).join(' ') + ' ...';
-                                // Jika mode potongan tengah ayat, sisa kata dari ayat tersebut ditambahkan di awal teks lanjutan
                                 let sisaKataAyatIni = kumpulanKata.slice(3).join(' ');
-                                teksLanjutanFinal = `${sisaKataAyatIni} ﴿${ayatDipilih.verseNumber}﴾ ` + (kumpulanLanjutan.length > 0 ? ' ' + kumpulanLanjutan.join(' ') : '');
+                                teksLanjutanFinal = `${sisaKataAyatIni} ﴿${keAngkaArab(ayatDipilih.verseNumber)}﴾ ` + (kumpulanLanjutan.length > 0 ? ' ' + kumpulanLanjutan.join(' ') : '');
                             } else {
                                 soalTeks = ayatDipilih.textArab;
                             }
