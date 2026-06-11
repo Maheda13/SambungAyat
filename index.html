@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Tahfiz - Sambung Ayat Pintar</title>
+    <title>Kuis Tahfiz - Sambung Ayat Pintar (Fix Juz 29)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,17 +22,17 @@
 
     <div id="app" class="max-w-md mx-auto p-4 md:max-w-2xl min-h-screen flex flex-col">
         
-        <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white">
+        <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
             <p class="font-semibold text-lg">{{ teksLoading }}</p>
-            <p class="text-xs text-slate-300 mt-1">Sistem sedang mengoptimasi data agar kuis berjalan instan.</p>
+            <p class="text-xs text-slate-300 mt-1">Sistem sedang mengompresi data agar muat di memori HP.</p>
         </div>
 
         <div v-if="layarAktif === 'dashboard'" class="w-full flex-1 flex flex-col py-4">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 class="text-2xl font-bold text-emerald-700">Tahfiz Quiz</h1>
-                    <p class="text-sm text-slate-500">Uji Hafalan Al-Qur'an (Offline Cache)</p>
+                    <p class="text-sm text-slate-500">Uji Hafalan Al-Qur'an (Optimized)</p>
                 </div>
                 <div class="flex gap-2">
                     <button @click="resetSemua" class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer" title="Acak Ulang">
@@ -94,7 +94,7 @@
                 </div>
 
                 <div v-if="bantuanTerbuka.lanjutan" class="border-t border-dashed border-slate-200 pt-6 text-center">
-                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-4">Lanjutan Ayat:</span>
+                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-4">2-3 Ayat Selanjutnya:</span>
                     <p class="font-arabic text-2xl md:text-3xl text-emerald-700 leading-[2.5] dir-rtl" dir="rtl">
                         {{ dataSoalAktif.lanjutanAyat }}
                     </p>
@@ -193,7 +193,7 @@
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
-                // ================= LOGIKA UTAMA EFFICIENCY (CACHING SYSTEM) =================
+                // ================= LOGIKA PENYELAMAT MEMORI (COMPRESSED CACHE) =================
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
@@ -210,19 +210,14 @@
 
                     try {
                         for (const juz of pilihanJuz.value) {
-                            // Cek apakah data Juz ini sudah tersimpan di memori browser lokal
-                            const cacheKeyArab = `cache_juz_arab_${juz}`;
-                            const cacheKeyArti = `cache_juz_arti_${juz}`;
-                            
-                            let dataJuzArab = localStorage.getItem(cacheKeyArab);
-                            let dataJuzArti = localStorage.getItem(cacheKeyArti);
+                            const cacheKeyMinified = `cache_juz_min_${juz}`;
+                            let dataJuzTerkompresi = localStorage.getItem(cacheKeyMinified);
 
-                            if (dataJuzArab && dataJuzArti) {
-                                // JIKA ADA DI CACHE: Langsung parsing (tidak pakai internet sama sekali)
-                                dataJuzArab = JSON.parse(dataJuzArab);
-                                dataJuzArti = JSON.parse(dataJuzArti);
+                            if (dataJuzTerkompresi) {
+                                // JIKA ADA DI CACHE: Langsung decode format mini
+                                tampunganAyat.push(...JSON.parse(dataJuzTerkompresi));
                             } else {
-                                // JIKA TIDAK ADA: Terpaksa download sekali saja via internet
+                                // JIKA TIDAK ADA: Download data mentah via Internet
                                 teksLoading.value = `Mengunduh Juz ${juz} via Internet...`;
                                 
                                 const [resArab, resArti] = await Promise.all([
@@ -230,23 +225,31 @@
                                     fetch(`https://api.alquran.cloud/v1/juz/${juz}/id.indonesian`).then(res => res.json())
                                 ]);
 
-                                dataJuzArab = resArab.data.ayahs;
-                                dataJuzArti = resArti.data.ayahs;
+                                const dataJuzArab = resArab.data.ayahs;
+                                const dataJuzArti = resArti.data.ayahs;
 
-                                // Simpan ke memori browser untuk kebutuhan kuis di masa depan
-                                localStorage.setItem(cacheKeyArab, JSON.stringify(dataJuzArab));
-                                localStorage.setItem(cacheKeyArti, JSON.stringify(dataJuzArti));
-                            }
+                                // Proses Kompresi: Hanya ambil field yang mutlak dibutuhkan
+                                let dataMini = [];
+                                for (let j = 0; j < dataJuzArab.length; j++) {
+                                    dataMini.push({
+                                        ar: dataJuzArab[j].text,                 // Teks Arab asli
+                                        id: dataJuzArti[j].text,                 // Teks Arti asli
+                                        sname: dataJuzArab[j].surah.englishName, // Nama Surat
+                                        no: dataJuzArab[j].numberInSurah,       // Nomor Ayat di Surat tersebut
+                                        sn: dataJuzArab[j].surah.number         // Nomor Urut Surat
+                                    });
+                                }
 
-                            // Satukan data Arab dan Terjemahan ke dalam bankSoal
-                            for (let j = 0; j < dataJuzArab.length; j++) {
-                                tampunganAyat.push({
-                                    textArab: dataJuzArab[j].text,
-                                    textArti: dataJuzArti[j].text,
-                                    surahName: dataJuzArab[j].surah.englishName,
-                                    verseNumber: dataJuzArab[j].numberInSurah,
-                                    surahNumber: dataJuzArab[j].surah.number 
-                                });
+                                // Simpan struktur super hemat ini ke localStorage
+                                try {
+                                    localStorage.setItem(cacheKeyMinified, JSON.stringify(dataMini));
+                                } catch (e) {
+                                    console.warn("Storage penuh, membersihkan cache lama...");
+                                    localStorage.clear(); // Bersihkan semua jika benar-benar penuh, lalu simpan ulang
+                                    localStorage.setItem(cacheKeyMinified, JSON.stringify(dataMini));
+                                }
+
+                                tampunganAyat.push(...dataMini);
                             }
                         }
 
@@ -256,60 +259,74 @@
 
                     } catch (error) {
                         console.error(error);
-                        alert("Gagal memuat data. Jika ini pertama kali membuka Juz tersebut, Anda memerlukan internet.");
+                        alert("Gagal memuat data. Periksa koneksi internet Anda untuk unduhan pertama.");
                     } finally {
                         sedangLoading.value = false;
                     }
                 };
 
                 const acakSoalKeNomor = () => {
-                    if (bankSoal.value.length === 0) return;
+    if (bankSoal.value.length === 0) return;
 
-                    let soalDiacak = [...bankSoal.value].sort(() => 0.5 - Math.random());
+    let soalDiacak = [...bankSoal.value].sort(() => 0.5 - Math.random());
 
-                    for (let i = 1; i <= totalNomor.value; i++) {
-                        let ayatDipilih = soalDiacak[i - 1];
-                        if(!ayatDipilih) break; // Antisipasi jika total soal di bank lebih kecil dari grid kuis
-                        
-                        let soalTeks = '';
-                        let kumpulanLanjutan = [];
+    for (let i = 1; i <= totalNomor.value; i++) {
+        let ayatDipilih = soalDiacak[i - 1];
+        if(!ayatDipilih) break;
+        
+        let soalTeks = '';
+        let kumpulanLanjutan = [];
+        let totalKataLanjutan = 0;
+        const TARGET_KATA = 12; // Batas ideal kata untuk bantuan agar tidak kepanjangan
 
-                        for (let k = 1; k <= 3; k++) {
-                            let ayatBerikutnya = bankSoal.value.find(a => 
-                                a.surahNumber === ayatDipilih.surahNumber && a.verseNumber === ayatDipilih.verseNumber + k
-                            );
-                            if (ayatBerikutnya) {
-                                kumpulanLanjutan.push(`${ayatBerikutnya.textArab} ﴿${keAngkaArab(ayatBerikutnya.verseNumber)}﴾`);
-                            }
-                        }
+        // Ambil ayat berikutnya secara dinamis berdasarkan akumulasi jumlah kata
+        let k = 1;
+        while (totalKataLanjutan < TARGET_KATA) {
+            let ayatBerikutnya = bankSoal.value.find(a => 
+                a.sn === ayatDipilih.sn && a.no === ayatDipilih.no + k
+            );
+            
+            if (ayatBerikutnya) {
+                let jumlahKataAyatIni = ayatBerikutnya.ar.split(' ').length;
+                kumpulanLanjutan.push(`${ayatBerikutnya.ar} ﴿${keAngkaArab(ayatBerikutnya.no)}﴾`);
+                totalKataLanjutan += jumlahKataAyatIni;
+                k++;
+            } else {
+                // Berhenti jika sudah mencapai akhir surat
+                break;
+            }
+        }
 
-                        let teksLanjutanFinal = kumpulanLanjutan.length > 0 
-                            ? kumpulanLanjutan.join(' ') 
-                            : '(Akhir Surat - Silakan lanjut ke surat berikutnya)';
+        let teksLanjutanFinal = kumpulanLanjutan.length > 0 
+            ? kumpulanLanjutan.join(' ') 
+            : '(Akhir Surat - Silakan lanjut ke surat berikutnya)';
 
-                        if (modeSoal.value === 'penuh') {
-                            soalTeks = ayatDipilih.textArab;
-                        } else {
-                            let kumpulanKata = ayatDipilih.textArab.split(' ');
-                            if (kumpulanKata.length > 4) {
-                                soalTeks = kumpulanKata.slice(0, 3).join(' ') + ' ...';
-                                let sisaKataAyatIni = kumpulanKata.slice(3).join(' ');
-                                teksLanjutanFinal = `${sisaKataAyatIni} ﴿${keAngkaArab(ayatDipilih.verseNumber)}﴾ ` + (kumpulanLanjutan.length > 0 ? ' ' + kumpulanLanjutan.join(' ') : '');
-                            } else {
-                                soalTeks = ayatDipilih.textArab;
-                            }
-                        }
+        // Terapkan metode pemotongan soal di layar kuis
+        if (modeSoal.value === 'penuh') {
+            soalTeks = ayatDipilih.ar;
+        } else {
+            let kumpulanKata = ayatDipilih.ar.split(' ');
+            if (kumpulanKata.length > 4) {
+                soalTeks = kumpulanKata.slice(0, 3).join(' ') + ' ...';
+                let sisaKataAyatIni = kumpulanKata.slice(3).join(' ');
+                
+                // Jika potongan tengah ayat, gabungkan sisa kata ayat ini ke awal teks lanjutan
+                teksLanjutanFinal = `${sisaKataAyatIni} ﴿${keAngkaArab(ayatDipilih.no)}﴾ ` + (kumpulanLanjutan.length > 0 ? ' ' + kumpulanLanjutan.join(' ') : '');
+            } else {
+                soalTeks = ayatDipilih.ar;
+            }
+        }
 
-                        soalPerNomor.value[i] = {
-                            surahName: ayatDipilih.surahName,
-                            verseNumber: ayatDipilih.verseNumber,
-                            potonganSoal: soalTeks,
-                            lanjutanAyat: teksLanjutanFinal,
-                            arti: ayatDipilih.textArti
-                        };
-                    }
-                };
-
+        soalPerNomor.value[i] = {
+            surahName: ayatDipilih.sname,
+            verseNumber: ayatDipilih.no,
+            potonganSoal: soalTeks,
+            lanjutanAyat: teksLanjutanFinal,
+            arti: ayatDipilih.id
+        };
+    }
+};
+                
                 const pilihNomor = (no) => {
                     if (!soalPerNomor.value[no]) return;
                     nomorTerpilih.value = no;
