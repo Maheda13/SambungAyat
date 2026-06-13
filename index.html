@@ -60,7 +60,7 @@
                 <span>Metode: <strong>Terjemah Mandiri (Per Kata)</strong></span>
             </div>
 
-            <!-- Grid 12 Nomor Premium (Lega di PC Wide) -->
+            <!-- Grid 12 Nomor Premium -->
             <div class="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 my-auto">
                 <button 
                     v-for="no in 12" 
@@ -111,37 +111,38 @@
                     <div v-if="kunciTerbuka" class="space-y-12 pt-4 transition-all duration-500">
                         
                         <!-- Perulangan per satu ayat -->
-                        <div v-for="(ayat, aIdx) in dataSoalAktif.listAyatData" :key="aIdx" class="border-b border-slate-100 pb-8 last:border-0 text-right">
+                        <div v-for="(ayat, aIdx) in dataSoalAktif.listAyatData" :key="aIdx" class="border-b border-slate-100 pb-8 last:border-0">
                             
                             <!-- Label Penanda Nomor Ayat di Atas Kanan -->
                             <div class="mb-4 flex justify-end">
                                 <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-md">Ayat ke-{{ ayat.verseNumber }}</span>
                             </div>
 
-                            <!-- PERBAIKAN TOTAL: Flex Row-Reverse + Justify-End Menjamin Susunan dari Kanan ke Kiri Sempurna -->
-                            <div class="flex flex-row-reverse flex-wrap justify-end gap-3 md:gap-4 w-full" dir="rtl">
+                            <!-- SOLUSI ABSOLUT: Menggunakan layout RTL murni dengan arah flex-row standar -->
+                            <!-- Kata pertama dijamin di baris 1 paling kanan, kata terakhir & nomor ayat di baris akhir paling kiri -->
+                            <div class="flex flex-row flex-wrap justify-start gap-3 md:gap-4 w-full" dir="rtl">
                                 
-                                <!-- Simbol Penutup Nomor Ayat diletakkan paling awal di row-reverse (artinya muncul paling kiri/akhir ayat) -->
-                                <div class="flex items-center justify-center px-2">
-                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-indigo-600 font-bold']">
-                                        ﴿{{ ayat.verseNumberArab }}﴾
-                                    </span>
-                                </div>
-
-                                <!-- Box Per-Kata Mufradat (Urutan data array dibalik di computed agar pas di flex-row-reverse) -->
+                                <!-- Box Per-Kata Mufradat (Berjalan normal sesuai urutan asli bacaan) -->
                                 <div 
-                                    v-for="(word, wIdx) in [...ayat.words].reverse()" 
+                                    v-for="(word, wIdx) in ayat.words" 
                                     :key="wIdx"
-                                    class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 min-w-[70px] md:min-w-[90px] flex flex-col items-center justify-between shadow-xs hover:border-indigo-300 transition"
+                                    class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 min-w-[75px] md:min-w-[95px] flex flex-col items-center justify-between shadow-xs hover:border-indigo-300 transition"
                                 >
                                     <!-- Bagian Atas: Teks Arab -->
                                     <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-slate-900 font-medium mb-2']">
                                         {{ word.arabic }}
                                     </span>
                                     
-                                    <!-- Bagian Bawah: Arti Bahasa Indonesia Per Kata -->
+                                    <!-- Bagian Bawah: Arti Per Kata (Dir=ltr agar terjemahan latin tidak terbalik) -->
                                     <span class="text-[10px] md:text-xs text-slate-500 font-semibold tracking-tight leading-tight text-center max-w-[110px]" dir="ltr">
                                         {{ word.translation }}
+                                    </span>
+                                </div>
+
+                                <!-- Simbol Penutup Nomor Ayat di akhir (otomatis bergeser ke kiri setelah semua kata habis) -->
+                                <div class="flex items-center justify-center px-2">
+                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-indigo-600 font-bold']">
+                                        ﴿{{ ayat.verseNumberArab }}﴾
                                     </span>
                                 </div>
 
