@@ -13,7 +13,7 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         
-        /* Font 1: Mushaf Madinah (Uthmanic) via CDN */
+        /* Font Mushaf Madinah via CDN */
         @font-face {
             font-family: 'MushafMadinah';
             src: url('https://cdn.jsdelivr.net/gh/scisneromam/Uthmanic-Fonts/UthmanicHafs%20V20.woff2') format('woff2');
@@ -21,7 +21,6 @@
             font-style: normal;
         }
 
-        /* Class Selector untuk masing-masing font */
         .font-madinah { font-family: 'MushafMadinah', serif; font-weight: 500; }
         .font-amiri { font-family: 'Amiri', serif; }
 
@@ -96,27 +95,27 @@
                 <h2 class="text-lg font-bold text-slate-700 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">Soal #{{ nomorTerpilih }}</h2>
             </div>
 
-            <div class="bg-white border border-slate-200 shadow-lg rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center space-y-8">
+            <!-- Box Utama Teks Ayat -->
+            <div class="bg-white border border-slate-200 shadow-lg rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center space-y-6">
                 <div class="text-center text-xs font-bold tracking-wide text-slate-400 uppercase">
                     QS. {{ dataSoalAktif.surahName }} : Ayat {{ dataSoalAktif.verseNumber }}
                 </div>
 
                 <div class="text-center">
                     <span class="inline-block text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full mb-4">Lanjutkan Ayat Ini:</span>
-                    <!-- fontTerpilih disuntikkan secara dinamis di sini -->
-                    <p :class="[fontTerpilih, 'text-3xl md:text-4xl text-slate-900 leading-[2.5] tracking-wide']" dir="rtl">
-                        {{ dataSoalAktif.potonganSoal }}
+                    
+                    <!-- MODIFIKASI UTAMA: Soal dan Lanjutan disatukan dalam satu paragraf R-T-L -->
+                    <p :class="[fontTerpilih, 'text-3xl md:text-4xl text-slate-900 leading-[2.5] tracking-wide text-center']" dir="rtl">
+                        <span>{{ dataSoalAktif.potonganSoal }}</span>
+                        
+                        <!-- Teks bantuan lanjutan otomatis menyambung di sisi kiri jika aktif -->
+                        <span v-if="bantuanTerbuka.lanjutan" class="text-emerald-600 font-medium bg-emerald-50/50 rounded-lg px-1 transition-all duration-300">
+                            {{ dataSoalAktif.lanjutanAyat }}
+                        </span>
                     </p>
                 </div>
 
-                <div v-if="bantuanTerbuka.lanjutan" class="border-t border-dashed border-slate-200 pt-6 text-center">
-                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-4">Lanjutan Ayat:</span>
-                    <!-- fontTerpilih disuntikkan secara dinamis di sini -->
-                    <p :class="[fontTerpilih, 'text-2xl md:text-3xl text-emerald-700 leading-[2.5] tracking-wide']" dir="rtl">
-                        {{ dataSoalAktif.lanjutanAyat }}
-                    </p>
-                </div>
-
+                <!-- Arti Terjemahan tetap di bawah karena menggunakan bahasa Indonesia -->
                 <div v-if="bantuanTerbuka.arti" class="border-t border-dashed border-slate-200 pt-6">
                     <span class="inline-block text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-3 py-1 rounded-full mb-3">Terjemahan Ayat Soal (Kemenag):</span>
                     <p class="text-sm md:text-base text-slate-600 italic leading-relaxed text-center">
@@ -125,9 +124,10 @@
                 </div>
             </div>
 
+            <!-- Tombol Navigasi Bantuan -->
             <div class="grid grid-cols-2 gap-3 mt-6">
                 <button @click="bantuanTerbuka.lanjutan = !bantuanTerbuka.lanjutan" :class="['py-3.5 rounded-xl font-bold shadow-sm transition text-sm cursor-pointer', bantuanTerbuka.lanjutan ? 'bg-emerald-700 text-white' : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200']">
-                    {{ bantuanTerbuka.lanjutan ? 'Tutup Lanjutan' : '📖 Lanjutan' }}
+                    {{ bantuanTerbuka.lanjutan ? 'Sembunyikan' : '📖 Lanjutan' }}
                 </button>
                 <button @click="bantuanTerbuka.arti = !bantuanTerbuka.arti" :class="['py-3.5 rounded-xl font-bold shadow-sm transition text-sm cursor-pointer', bantuanTerbuka.arti ? 'bg-blue-700 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200']">
                     {{ bantuanTerbuka.arti ? 'Tutup Arti' : '🔍 Arti Ayat' }}
@@ -143,7 +143,6 @@
                     <button @click="tampilkanModal = false" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">✕</button>
                 </div>
 
-                <!-- Opsi 1: Pilih Juz -->
                 <div class="mb-4">
                     <div class="flex justify-between items-end mb-2">
                         <label class="text-sm font-bold text-slate-700">Pilih Juz Target:</label>
@@ -153,7 +152,6 @@
                             <button @click="kosongkanJuz" class="text-rose-500 font-bold hover:text-rose-700 cursor-pointer">Reset</button>
                         </div>
                     </div>
-                    
                     <div class="border border-slate-200 bg-slate-50 rounded-xl p-2.5 max-h-32 overflow-y-auto custom-scroll grid grid-cols-3 gap-2">
                         <label v-for="juz in 30" :key="juz" class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
                             <input type="checkbox" :value="juz" v-model="pilihanJuz" class="w-4 h-4 accent-emerald-600">
@@ -162,7 +160,6 @@
                     </div>
                 </div>
 
-                <!-- Opsi 2: Metode Potongan -->
                 <div class="mb-4">
                     <label class="text-sm font-bold text-slate-700 block mb-2">Metode Potongan:</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -175,7 +172,6 @@
                     </div>
                 </div>
 
-                <!-- Opsi 3: Pilihan Jenis Font (FITUR BARU) -->
                 <div class="mb-6">
                     <label class="text-sm font-bold text-slate-700 block mb-2">Jenis Font Arab:</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -207,7 +203,7 @@
                 
                 const pilihanJuz = ref([30]); 
                 const modeSoal = ref('penuh');
-                const fontTerpilih = ref('font-madinah'); // State Default: Menggunakan Mushaf Madinah
+                const fontTerpilih = ref('font-madinah'); 
                 const totalNomor = ref(12); 
 
                 const bankSoal = ref([]); 
@@ -226,7 +222,7 @@
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
-                // ================= LOGIKA UTAMA FETCHING DATA =================
+                // ================= LOGIKA ENGINE KUIS =================
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
