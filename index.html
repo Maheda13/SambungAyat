@@ -12,7 +12,19 @@
     
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .font-arabic { font-family: 'Amiri', serif; }
+        
+        /* Font 1: Mushaf Madinah (Uthmanic) via CDN */
+        @font-face {
+            font-family: 'MushafMadinah';
+            src: url('https://cdn.jsdelivr.net/gh/scisneromam/Uthmanic-Fonts/UthmanicHafs%20V20.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Class Selector untuk masing-masing font */
+        .font-madinah { font-family: 'MushafMadinah', serif; font-weight: 500; }
+        .font-amiri { font-family: 'Amiri', serif; }
+
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -22,12 +34,14 @@
 
     <div id="app" class="max-w-md mx-auto p-4 md:max-w-2xl min-h-screen flex flex-col">
         
+        <!-- Layar Loading -->
         <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
             <p class="font-semibold text-lg">{{ teksLoading }}</p>
             <p class="text-xs text-slate-300 mt-1">Sistem sedang mengompresi data agar muat di memori HP.</p>
         </div>
 
+        <!-- Layar Dashboard -->
         <div v-if="layarAktif === 'dashboard'" class="w-full flex-1 flex flex-col py-4">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -73,6 +87,7 @@
             </div>
         </div>
 
+        <!-- Layar Soal Kuis -->
         <div v-if="layarAktif === 'soal'" class="w-full flex-1 flex flex-col py-4">
             <div class="flex items-center justify-between mb-6">
                 <button @click="layarAktif = 'dashboard'" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm flex items-center gap-2 shadow-sm cursor-pointer">
@@ -88,14 +103,16 @@
 
                 <div class="text-center">
                     <span class="inline-block text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full mb-4">Lanjutkan Ayat Ini:</span>
-                    <p class="font-arabic text-3xl md:text-4xl text-slate-800 leading-[2.5]" dir="rtl">
+                    <!-- fontTerpilih disuntikkan secara dinamis di sini -->
+                    <p :class="[fontTerpilih, 'text-3xl md:text-4xl text-slate-900 leading-[2.5] tracking-wide']" dir="rtl">
                         {{ dataSoalAktif.potonganSoal }}
                     </p>
                 </div>
 
                 <div v-if="bantuanTerbuka.lanjutan" class="border-t border-dashed border-slate-200 pt-6 text-center">
                     <span class="inline-block text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-4">Lanjutan Ayat:</span>
-                    <p class="font-arabic text-2xl md:text-3xl text-emerald-700 leading-[2.5]" dir="rtl">
+                    <!-- fontTerpilih disuntikkan secara dinamis di sini -->
+                    <p :class="[fontTerpilih, 'text-2xl md:text-3xl text-emerald-700 leading-[2.5] tracking-wide']" dir="rtl">
                         {{ dataSoalAktif.lanjutanAyat }}
                     </p>
                 </div>
@@ -118,6 +135,7 @@
             </div>
         </div>
 
+        <!-- Modal Pengaturan -->
         <div v-if="tampilkanModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40">
             <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl">
                 <div class="flex justify-between items-center mb-5">
@@ -125,7 +143,8 @@
                     <button @click="tampilkanModal = false" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">✕</button>
                 </div>
 
-                <div class="mb-5">
+                <!-- Opsi 1: Pilih Juz -->
+                <div class="mb-4">
                     <div class="flex justify-between items-end mb-2">
                         <label class="text-sm font-bold text-slate-700">Pilih Juz Target:</label>
                         <div class="flex gap-2 text-xs">
@@ -135,23 +154,36 @@
                         </div>
                     </div>
                     
-                    <div class="border border-slate-200 bg-slate-50 rounded-xl p-2.5 max-h-44 overflow-y-auto custom-scroll grid grid-cols-3 gap-2">
+                    <div class="border border-slate-200 bg-slate-50 rounded-xl p-2.5 max-h-32 overflow-y-auto custom-scroll grid grid-cols-3 gap-2">
                         <label v-for="juz in 30" :key="juz" class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
                             <input type="checkbox" :value="juz" v-model="pilihanJuz" class="w-4 h-4 accent-emerald-600">
                             <span class="text-xs font-bold text-slate-700">{{ juz }}</span>
                         </label>
                     </div>
-                    <p class="text-xs text-slate-500 mt-2 font-medium">Terpilih: {{ pilihanJuz.length }} Juz</p>
                 </div>
 
-                <div class="mb-6">
+                <!-- Opsi 2: Metode Potongan -->
+                <div class="mb-4">
                     <label class="text-sm font-bold text-slate-700 block mb-2">Metode Potongan:</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button @click="modeSoal = 'penuh'" :class="['p-2.5 rounded-xl border-2 text-sm font-bold transition text-center cursor-pointer', modeSoal === 'penuh' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50']">
+                        <button @click="modeSoal = 'penuh'" :class="['p-2.5 rounded-xl border-2 text-xs font-bold transition text-center cursor-pointer', modeSoal === 'penuh' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50']">
                             Satu Ayat Penuh
                         </button>
-                        <button @click="modeSoal = 'potongan'" :class="['p-2.5 rounded-xl border-2 text-sm font-bold transition text-center cursor-pointer', modeSoal === 'potongan' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50']">
+                        <button @click="modeSoal = 'potongan'" :class="['p-2.5 rounded-xl border-2 text-xs font-bold transition text-center cursor-pointer', modeSoal === 'potongan' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50']">
                             Tengah Ayat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Opsi 3: Pilihan Jenis Font (FITUR BARU) -->
+                <div class="mb-6">
+                    <label class="text-sm font-bold text-slate-700 block mb-2">Jenis Font Arab:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button @click="fontTerpilih = 'font-madinah'" :class="['p-2.5 rounded-xl border-2 text-xs font-bold transition text-center cursor-pointer', fontTerpilih === 'font-madinah' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50']">
+                            Mushaf Madinah
+                        </button>
+                        <button @click="fontTerpilih = 'font-amiri'" :class="['p-2.5 rounded-xl border-2 text-xs font-bold transition text-center cursor-pointer', fontTerpilih === 'font-amiri' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50']">
+                            Amiri (Klasik)
                         </button>
                     </div>
                 </div>
@@ -175,6 +207,7 @@
                 
                 const pilihanJuz = ref([30]); 
                 const modeSoal = ref('penuh');
+                const fontTerpilih = ref('font-madinah'); // State Default: Menggunakan Mushaf Madinah
                 const totalNomor = ref(12); 
 
                 const bankSoal = ref([]); 
@@ -193,7 +226,7 @@
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
-                // ================= LOGIKA PENYELAMAT MEMORI (OPTIMIZED PARALLEL FETCH) =================
+                // ================= LOGIKA UTAMA FETCHING DATA =================
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
@@ -209,7 +242,6 @@
                     let tampunganAyat = [];
                     let juzPerluFetch = [];
 
-                    // 1. Filter: Mana juz yang sudah dicache, mana yang harus didownload
                     for (const juz of pilihanJuz.value) {
                         const cacheKeyMinified = `cache_juz_min_${juz}`;
                         let dataJuzTerkompresi = localStorage.getItem(cacheKeyMinified);
@@ -222,7 +254,6 @@
                     }
 
                     try {
-                        // 2. Jika ada data yang belum ada di cache, unduh secara PARALEL (Bersamaan)
                         if (juzPerluFetch.length > 0) {
                             teksLoading.value = `Mengunduh ${juzPerluFetch.length} Juz via Internet...`;
 
@@ -244,10 +275,8 @@
                                 return { juz, resArab, resArti };
                             });
 
-                            // Eksekusi semua request network sekaligus
                             const hasilUnduhan = await Promise.all(fetchPromises);
 
-                            // 3. Proses kompresi data setelah semua sukses diunduh (mencegah tabrakan di localStorage)
                             for (const hasil of hasilUnduhan) {
                                 const dataJuzArab = hasil.resArab.data.ayahs;
                                 const dataJuzArti = hasil.resArti.data.ayahs;
@@ -255,20 +284,18 @@
 
                                 for (let j = 0; j < dataJuzArab.length; j++) {
                                     dataMini.push({
-                                        ar: dataJuzArab[j].text,                 // Teks Arab asli
-                                        id: dataJuzArti[j].text,                 // Teks Arti asli
-                                        sname: dataJuzArab[j].surah.englishName, // Nama Surat
-                                        no: dataJuzArab[j].numberInSurah,       // Nomor Ayat di Surat tersebut
-                                        sn: dataJuzArab[j].surah.number          // Nomor Urut Surat
+                                        ar: dataJuzArab[j].text,
+                                        id: dataJuzArti[j].text,
+                                        sname: dataJuzArab[j].surah.englishName,
+                                        no: dataJuzArab[j].numberInSurah,
+                                        sn: dataJuzArab[j].surah.number
                                     });
                                 }
 
-                                // Simpan ke localStorage masing-masing juz
                                 const cacheKeyMinified = `cache_juz_min_${hasil.juz}`;
                                 try {
                                     localStorage.setItem(cacheKeyMinified, JSON.stringify(dataMini));
                                 } catch (e) {
-                                    console.warn("Storage penuh, membersihkan cache lama...");
                                     localStorage.clear(); 
                                     localStorage.setItem(cacheKeyMinified, JSON.stringify(dataMini));
                                 }
@@ -369,7 +396,7 @@
                 });
 
                 return {
-                    layarAktif, tampilkanModal, sedangLoading, teksLoading, pilihanJuz, modeSoal, totalNomor,
+                    layarAktif, tampilkanModal, sedangLoading, teksLoading, pilihanJuz, modeSoal, fontTerpilih, totalNomor,
                     nomorTerpilih, nomorHangus, bankSoal, dataSoalAktif, bantuanTerbuka,
                     pilihSemuaJuz, kosongkanJuz, unduhDanSimpanPengaturan, pilihNomor, resetSemua
                 }
