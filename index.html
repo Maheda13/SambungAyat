@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Tahfiz - Terjemah Per Kata Premium</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        
+        @font-face {
+            font-family: 'MushafMadinah';
+            src: url('https://cdn.jsdelivr.net/gh/scisneromam/Uthmanic-Fonts/UthmanicHafs%20V20.woff2') format('woff2');
+            font-weight: normal; font-style: normal;
+        }
+
+        .font-madinah { font-family: 'MushafMadinah', serif; font-weight: 500; }
+        .font-amiri { font-family: 'Amiri', serif; }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app" class="max-w-md mx-auto p-4 md:max-w-4xl lg:max-w-5xl min-h-screen flex flex-col justify-center py-6 md:py-12">
+        
+        <!-- Layar Loading -->
+        <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
+            <p class="font-semibold text-lg">{{ teksLoading }}</p>
+            <p class="text-xs text-slate-300 mt-1">Sistem sedang merakit koordinat kosakata dari database Quran.com v4...</p>
+        </div>
+
+        <!-- Layar Dashboard -->
+        <div v-if="layarAktif === 'dashboard'" class="w-full flex-1 flex flex-col py-4 justify-between">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-indigo-700">Mufradat Pro</h1>
+                    <p class="text-sm text-slate-500">Analisis Hafalan & Terjemah Per Kata Al-Qur'an</p>
+                </div>
+                <div class="flex gap-2">
+                    <button @click="resetSemua" class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer" title="Acak Ulang">
+                        🔄
+                    </button>
+                    <button @click="tampilkanModal = true" class="p-3 bg-indigo-600 text-white rounded-xl shadow-sm hover:bg-indigo-700 transition cursor-pointer font-semibold text-sm">
+                        ⚙️ Pilih Surah
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 text-indigo-800 p-4 rounded-xl mb-6 text-sm flex justify-between items-center border border-indigo-100 shadow-sm">
+                <span>Surah Target: <strong>Surah {{ namaSurahTerpilih }}</strong></span>
+                <span>Metode: <strong>Terjemah Lafziyyah (Per Kata)</strong></span>
+            </div>
+
+            <!-- Grid 12 Nomor Premium (Lega di PC Wide) -->
+            <div class="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 my-auto">
+                <button 
+                    v-for="no in 12" 
+                    :key="no"
+                    @click="pilihNomor(no)"
+                    :disabled="nomorHangus.includes(no)"
+                    :class="[
+                        'h-24 text-2xl font-bold rounded-2xl transition duration-200 flex items-center justify-center shadow-sm',
+                        nomorHangus.includes(no) 
+                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed border-2 border-transparent opacity-70' 
+                            : 'bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white active:scale-95 cursor-pointer'
+                    ]"
+                >
+                    {{ no }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Layar Jalannya Kuis -->
+        <div v-if="layarAktif === 'soal'" class="w-full flex-1 flex flex-col py-4">
+            <div class="flex items-center justify-between mb-6">
+                <button @click="layarAktif = 'dashboard'" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm flex items-center gap-2 shadow-sm cursor-pointer">
+                    <span>←</span> Kembali ke Dashboard
+                </button>
+                <h2 class="text-lg font-bold text-slate-700 bg-white px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm">Soal #{{ nomorTerpilih }}</h2>
+            </div>
+
+            <!-- Box Utama Teks Ayat Premium -->
+            <div class="bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-12 flex-1 flex flex-col justify-center space-y-8">
+                
+                <div class="text-center w-full max-w-4xl mx-auto space-y-6">
+                    
+                    <!-- PETUNJUK AWAL: Hanya memunculkan nama surah dan range nomor ayat -->
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 max-w-xl mx-auto shadow-xs">
+                        <span class="text-xs font-bold tracking-wider text-indigo-600 uppercase bg-indigo-100 px-3 py-1 rounded-full">Petunjuk Materi Soal:</span>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-3">Surah {{ namaSurahTerpilih }}</h3>
+                        <p class="text-sm font-semibold text-slate-500 mt-1">Ayat: {{ dataSoalAktif.startVerse }} sampai {{ dataSoalAktif.endVerse }}</p>
+                    </div>
+
+                    <!-- TOMBOL PEMICU TAMPILAN (Akan menyusut/hilang ketika sudah dibuka) -->
+                    <div v-if="!kunciTerbuka" class="pt-4 animate-bounce">
+                        <button @click="kunciTerbuka = true" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-100 transition text-base cursor-pointer">
+                            📖 Tampilkan Ayat & Terjemah Per Kata
+                        </button>
+                    </div>
+
+                    <!-- AREA INTI: Tampilan Ayat Per Kata Mandiri (Hanya muncul jika kunciTerbuka === true) -->
+                    <div v-if="kunciTerbuka" class="space-y-12 pt-4 transition-all duration-500">
+                        
+                        <!-- Perulangan per satu ayat -->
+                        <div v-for="(ayat, aIdx) in dataSoalAktif.listAyatData" :key="aIdx" class="border-b border-slate-100 pb-8 last:border-0">
+                            
+                            <div class="text-left mb-4">
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-md">Ayat ke-{{ ayat.verseNumber }}</span>
+                            </div>
+
+                            <!-- Flex Grid mengalir dari kanan ke kiri (RTL) untuk susunan kata arab -->
+                            <div class="flex flex-row-reverse flex-wrap justify-start gap-3 md:gap-4 w-full" dir="rtl">
+                                
+                                <!-- Box Per-Kata Mufradat -->
+                                <div 
+                                    v-for="(word, wIdx) in ayat.words" 
+                                    :key="wIdx"
+                                    class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 min-w-[70px] md:min-w-[90px] flex flex-col items-center justify-between shadow-xs hover:border-indigo-300 transition"
+                                >
+                                    <!-- Bagian Atas: Teks Arab -->
+                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-slate-900 font-medium mb-2']">
+                                        {{ word.arabic }}
+                                    </span>
+                                    
+                                    <!-- Bagian Bawah: Arti Bahasa Indonesia Per Kata -->
+                                    <span class="text-[10px] md:text-xs text-slate-500 font-semibold tracking-tight leading-tight text-center max-w-[110px]" dir="ltr">
+                                        {{ word.translation }}
+                                    </span>
+                                </div>
+
+                                <!-- Simbol Penutup Nomor Ayat di Akhir Kata -->
+                                <div class="flex items-center justify-center px-2">
+                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-indigo-600 font-bold']">
+                                        ﴿{{ ayat.verseNumberArab }}﴾
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Modal Pengaturan Pilihan Surah -->
+        <div v-if="tampilkanModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">Pilih Surah Target</h3>
+                    <button @click="tampilkanModal = false" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">✕</button>
+                </div>
+                
+                <div class="mb-5">
+                    <label class="text-xs font-bold text-slate-500 uppercase block mb-2">Daftar Surah Tersedia:</label>
+                    <div class="border border-slate-200 bg-slate-50 rounded-xl p-2 max-h-56 overflow-y-auto custom-scroll space-y-1">
+                        <button 
+                            v-for="s in listSurahPilihan" 
+                            :key="s.id"
+                            @click="idSurahTerpilih = s.id; namaSurahTerpilih = s.name"
+                            :class="['w-full text-left p-2.5 rounded-lg text-xs font-bold transition flex justify-between items-center', idSurahTerpilih === s.id ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100 text-slate-700']"
+                        >
+                            <span>{{ s.id }}. Surah {{ s.name }}</span>
+                            <span class="text-[10px] opacity-80 bg-slate-200 text-slate-800 px-2 py-0.5 rounded-md">{{ s.verseCount }} Ayat</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="text-sm font-bold text-slate-700 block mb-2">Jenis Font Arab:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button @click="fontTerpilih = 'font-madinah'" :class="['p-2.5 rounded-xl border-2 text-xs font-bold transition text-center cursor-pointer', fontTerpilih === 'font-madinah' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-500']">Mushaf Madinah</button>
+                        <button @click="fontTerpilih = 'font-amiri'" :class="['p-2.5 rounded-xl border-2 text-xs font-bold transition text-center cursor-pointer', fontTerpilih === 'font-amiri' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-500']">Amiri (Klasik)</button>
+                    </div>
+                </div>
+
+                <button @click="muatDataMateriSurahPerKata" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition cursor-pointer">
+                    Terapkan & Generate 12 Soal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const layarAktif = ref('dashboard');
+                const tampilkanModal = ref(false);
+                const sedangLoading = ref(false);
+                const teksLoading = ref("");
+                const fontTerpilih = ref('font-madinah');
+
+                const idSurahTerpilih = ref(67); // Default: Al-Mulk
+                const namaSurahTerpilih = ref("Al-Mulk");
+
+                const bankSoal = ref({});
+                const nomorTerpilih = ref(null);
+                const nomorHangus = ref([]);
+                const dataSoalAktif = ref({});
+                const kunciTerbuka = ref(false);
+
+                const listSurahPilihan = ref([
+                    { id: 1, name: 'Al-Fatihah', verseCount: 7 },
+                    { id: 56, name: 'Al-Waqi\'ah', verseCount: 96 },
+                    { id: 67, name: 'Al-Mulk', verseCount: 30 },
+                    { id: 73, name: 'Al-Muzzammil', verseCount: 20 },
+                    { id: 78, name: 'An-Naba\'', verseCount: 40 },
+                    { id: 89, name: 'Al-Fajr', verseCount: 30 },
+                    { id: 93, name: 'Ad-Duha', verseCount: 11 },
+                    { id: 110, name: 'An-Nasr', verseCount: 3 }
+                ]);
+
+                const keAngkaArab = (num) => {
+                    const angkaArab = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                    return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
+                };
+
+                // ENGINE ENGINE AJAX PARSING WORD BY WORD
+                const muatDataMateriSurahPerKata = async () => {
+                    sedangLoading.value = true;
+                    tampilkanModal.value = false;
+                    nomorHangus.value = [];
+                    bankSoal.value = {};
+
+                    teksLoading.value = `Mengunduh Data Kata Per Kata Surah ${namaSurahTerpilih.value}...`;
+
+                    try {
+                        const url = `https://api.quran.com/api/v4/verses/by_chapter/${idSurahTerpilih.value}?language=id&words=true&word_fields=text_uthmani&per_page=150`;
+                        const dataRes = await fetch(url).then(res => res.json());
+                        const verses = dataRes.verses;
+
+                        if(!verses || verses.length === 0) throw new Error("Materi Kosong");
+
+                        // Kita pasang algoritma generate blok 12 paket soal kuis (setiap paket berisi kelompok 2 - 4 ayat sekaligus)
+                        for (let i = 1; i <= 12; i++) {
+                            
+                            // Ambil starting ayat secara acak dari total ayat surah
+                            let indexAcak = Math.floor(Math.random() * verses.length);
+                            
+                            // Berapa panjang kelanjutan blok ayatnya (kita set dinamis antara 2 sampai 4 ayat)
+                            let rentangPanjangAyat = Math.floor(Math.random() * 3) + 2; 
+                            
+                            let kumpulanAyatBlokData = [];
+                            let startVerseNum = 0;
+                            let endVerseNum = 0;
+
+                            for(let x = 0; x < rentangPanjangAyat; x++) {
+                                let targetIndex = indexAcak + x;
+                                // Jika index melebihi total ayat, kita batasi agar tidak error overflow
+                                if (targetIndex >= verses.length) break;
+
+                                let itemVerse = verses[targetIndex];
+                                if(x === 0) startVerseNum = itemVerse.verse_number;
+                                endVerseNum = itemVerse.verse_number;
+
+                                // Olah data perkata di dalam ayat tersebut
+                                let listWordsOlah = itemVerse.words
+                                    .filter(w => w.char_type_name === 'word') // Hanya tipe kata murni
+                                    .map(w => {
+                                        return {
+                                            arabic: w.text_uthmani,
+                                            translation: w.translation.text.replace(/<\/?[^>]+(>|$)/g, "") // Bersihkan tag HTML dari API
+                                        }
+                                    });
+
+                                kumpulanAyatBlokData.push({
+                                    verseNumber: itemVerse.verse_number,
+                                    verseNumberArab: keAngkaArab(itemVerse.verse_number),
+                                    words: listWordsOlah
+                                });
+                            }
+
+                            bankSoal.value[i] = {
+                                startVerse: startVerseNum,
+                                endVerse: endVerseNum,
+                                listAyatData: kumpulanAyatBlokData
+                            };
+                        }
+
+                        layarAktif.value = 'dashboard';
+                    } catch (error) {
+                        console.error(error);
+                        alert("Gagal memproses data kosakata surah ini, silakan coba surah yang lain.");
+                    } finally {
+                        sedangLoading.value = false;
+                    }
+                };
+
+                const pilihNomor = (no) => {
+                    if (!bankSoal.value[no]) return;
+                    nomorTerpilih.value = no;
+                    nomorHangus.value.push(no);
+                    dataSoalAktif.value = bankSoal.value[no];
+                    kunciTerbuka.value = false; // Reset agar ayat tersembunyi di awal kuis
+                    layarAktif.value = 'soal';
+                };
+
+                const resetSemua = () => {
+                    if(confirm("Acak ulang kumpulan ayat mufradat baru untuk ke-12 nomor?")) {
+                        muatDataMateriSurahPerKata();
+                    }
+                };
+
+                onMounted(() => {
+                    muatDataMateriSurahPerKata();
+                });
+
+                return {
+                    layarAktif, tampilkanModal, sedangLoading, teksLoading, fontTerpilih,
+                    idSurahTerpilih, namaSurahTerpilih, bankSoal, nomorTerpilih, nomorHangus,
+                    dataSoalAktif, kunciTerbuka, listSurahPilihan,
+                    muatDataMateriSurahPerKata, pilihNomor, resetSemua
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
