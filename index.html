@@ -57,7 +57,7 @@
 
             <div class="bg-indigo-50 text-indigo-800 p-4 rounded-xl mb-6 text-sm flex justify-between items-center border border-indigo-100 shadow-sm">
                 <span>Surah Target: <strong>Surah {{ namaSurahTerpilih }}</strong></span>
-                <span>Metode: <strong>Terjemah Lafziyyah (Per Kata)</strong></span>
+                <span>Metode: <strong>Terjemah Mandiri (Per Kata)</strong></span>
             </div>
 
             <!-- Grid 12 Nomor Premium (Lega di PC Wide) -->
@@ -100,29 +100,37 @@
                         <p class="text-sm font-semibold text-slate-500 mt-1">Ayat: {{ dataSoalAktif.startVerse }} sampai {{ dataSoalAktif.endVerse }}</p>
                     </div>
 
-                    <!-- TOMBOL PEMICU TAMPILAN (Akan menyusut/hilang ketika sudah dibuka) -->
+                    <!-- TOMBOL PEMICU TAMPILAN -->
                     <div v-if="!kunciTerbuka" class="pt-4 animate-bounce">
                         <button @click="kunciTerbuka = true" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-100 transition text-base cursor-pointer">
                             📖 Tampilkan Ayat & Terjemah Per Kata
                         </button>
                     </div>
 
-                    <!-- AREA INTI: Tampilan Ayat Per Kata Mandiri (Hanya muncul jika kunciTerbuka === true) -->
+                    <!-- AREA INTI: Tampilan Ayat Per Kata Mandiri (Muncul jika kunciTerbuka === true) -->
                     <div v-if="kunciTerbuka" class="space-y-12 pt-4 transition-all duration-500">
                         
                         <!-- Perulangan per satu ayat -->
-                        <div v-for="(ayat, aIdx) in dataSoalAktif.listAyatData" :key="aIdx" class="border-b border-slate-100 pb-8 last:border-0">
+                        <div v-for="(ayat, aIdx) in dataSoalAktif.listAyatData" :key="aIdx" class="border-b border-slate-100 pb-8 last:border-0 text-right">
                             
-                            <div class="text-left mb-4">
+                            <!-- Label Penanda Nomor Ayat di Atas Kanan -->
+                            <div class="mb-4 flex justify-end">
                                 <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-md">Ayat ke-{{ ayat.verseNumber }}</span>
                             </div>
 
-                            <!-- Flex Grid mengalir dari kanan ke kiri (RTL) untuk susunan kata arab -->
-                            <div class="flex flex-row-reverse flex-wrap justify-start gap-3 md:gap-4 w-full" dir="rtl">
+                            <!-- PERBAIKAN TOTAL: Flex Row-Reverse + Justify-End Menjamin Susunan dari Kanan ke Kiri Sempurna -->
+                            <div class="flex flex-row-reverse flex-wrap justify-end gap-3 md:gap-4 w-full" dir="rtl">
                                 
-                                <!-- Box Per-Kata Mufradat -->
+                                <!-- Simbol Penutup Nomor Ayat diletakkan paling awal di row-reverse (artinya muncul paling kiri/akhir ayat) -->
+                                <div class="flex items-center justify-center px-2">
+                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-indigo-600 font-bold']">
+                                        ﴿{{ ayat.verseNumberArab }}﴾
+                                    </span>
+                                </div>
+
+                                <!-- Box Per-Kata Mufradat (Urutan data array dibalik di computed agar pas di flex-row-reverse) -->
                                 <div 
-                                    v-for="(word, wIdx) in ayat.words" 
+                                    v-for="(word, wIdx) in [...ayat.words].reverse()" 
                                     :key="wIdx"
                                     class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 min-w-[70px] md:min-w-[90px] flex flex-col items-center justify-between shadow-xs hover:border-indigo-300 transition"
                                 >
@@ -134,13 +142,6 @@
                                     <!-- Bagian Bawah: Arti Bahasa Indonesia Per Kata -->
                                     <span class="text-[10px] md:text-xs text-slate-500 font-semibold tracking-tight leading-tight text-center max-w-[110px]" dir="ltr">
                                         {{ word.translation }}
-                                    </span>
-                                </div>
-
-                                <!-- Simbol Penutup Nomor Ayat di Akhir Kata -->
-                                <div class="flex items-center justify-center px-2">
-                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-indigo-600 font-bold']">
-                                        ﴿{{ ayat.verseNumberArab }}﴾
                                     </span>
                                 </div>
 
@@ -202,7 +203,7 @@
                 const teksLoading = ref("");
                 const fontTerpilih = ref('font-madinah');
 
-                const idSurahTerpilih = ref(67); // Default: Al-Mulk
+                const idSurahTerpilih = ref(67); 
                 const namaSurahTerpilih = ref("Al-Mulk");
 
                 const bankSoal = ref({});
@@ -227,7 +228,6 @@
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
-                // ENGINE ENGINE AJAX PARSING WORD BY WORD
                 const muatDataMateriSurahPerKata = async () => {
                     sedangLoading.value = true;
                     tampilkanModal.value = false;
@@ -243,13 +243,8 @@
 
                         if(!verses || verses.length === 0) throw new Error("Materi Kosong");
 
-                        // Kita pasang algoritma generate blok 12 paket soal kuis (setiap paket berisi kelompok 2 - 4 ayat sekaligus)
                         for (let i = 1; i <= 12; i++) {
-                            
-                            // Ambil starting ayat secara acak dari total ayat surah
                             let indexAcak = Math.floor(Math.random() * verses.length);
-                            
-                            // Berapa panjang kelanjutan blok ayatnya (kita set dinamis antara 2 sampai 4 ayat)
                             let rentangPanjangAyat = Math.floor(Math.random() * 3) + 2; 
                             
                             let kumpulanAyatBlokData = [];
@@ -258,20 +253,18 @@
 
                             for(let x = 0; x < rentangPanjangAyat; x++) {
                                 let targetIndex = indexAcak + x;
-                                // Jika index melebihi total ayat, kita batasi agar tidak error overflow
                                 if (targetIndex >= verses.length) break;
 
                                 let itemVerse = verses[targetIndex];
                                 if(x === 0) startVerseNum = itemVerse.verse_number;
                                 endVerseNum = itemVerse.verse_number;
 
-                                // Olah data perkata di dalam ayat tersebut
                                 let listWordsOlah = itemVerse.words
-                                    .filter(w => w.char_type_name === 'word') // Hanya tipe kata murni
+                                    .filter(w => w.char_type_name === 'word')
                                     .map(w => {
                                         return {
                                             arabic: w.text_uthmani,
-                                            translation: w.translation.text.replace(/<\/?[^>]+(>|$)/g, "") // Bersihkan tag HTML dari API
+                                            translation: w.translation.text.replace(/<\/?[^>]+(>|$)/g, "")
                                         }
                                     });
 
@@ -303,7 +296,7 @@
                     nomorTerpilih.value = no;
                     nomorHangus.value.push(no);
                     dataSoalAktif.value = bankSoal.value[no];
-                    kunciTerbuka.value = false; // Reset agar ayat tersembunyi di awal kuis
+                    kunciTerbuka.value = false; 
                     layarAktif.value = 'soal';
                 };
 
