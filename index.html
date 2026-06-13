@@ -31,7 +31,6 @@
 </head>
 <body class="text-slate-800">
 
-    <!-- Kontainer Aplikasi Diperluas untuk Kenyamanan Tampilan PC (md:max-w-4xl lg:max-w-5xl) -->
     <div id="app" class="max-w-md mx-auto p-4 md:max-w-4xl lg:max-w-5xl min-h-screen flex flex-col justify-center py-6 md:py-12">
         
         <!-- Layar Loading -->
@@ -63,7 +62,6 @@
                 <span>Mode: <strong>{{ modeSoal === 'penuh' ? 'Satu Ayat' : 'Potongan' }}</strong></span>
             </div>
 
-            <!-- Grid nomor melebar dengan proporsional di PC (md:grid-cols-6) -->
             <div v-if="bankSoal.length === 0" class="text-center my-auto p-8 bg-amber-50 border border-amber-200 rounded-2xl">
                 <p class="text-amber-800 font-semibold mb-2">Belum Ada Data Soal</p>
                 <p class="text-xs text-amber-600 mb-4">Silakan buka Pengaturan untuk memilih target Juz materi kuis.</p>
@@ -97,43 +95,42 @@
                 <h2 class="text-lg font-bold text-slate-700 bg-white px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm">Soal #{{ nomorTerpilih }}</h2>
             </div>
 
-            <!-- Box Utama Teks Ayat (Lebih luas dan mewah di PC dengan md:p-12) -->
+            <!-- Box Utama Teks Ayat Premium (Optimal untuk Mobile maupun PC Desktop Wide) -->
             <div class="bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-12 flex-1 flex flex-col justify-center space-y-8">
                 
-                <!-- Perbaikan 3: Nama Surat & Ayat hanya muncul jika Lanjutan/Jawaban diaktifkan -->
-                <div class="text-center min-h-[32px] flex items-center justify-center">
-                    <span v-if="bantuanTerbuka.lanjutan" class="text-xs md:text-sm font-bold tracking-wide text-emerald-700 bg-emerald-100 border border-emerald-200 px-4 py-1.5 rounded-full uppercase transition-all duration-300">
-                        QS. {{ dataSoalAktif.surahName }} : Ayat {{ dataSoalAktif.verseNumber }}
-                    </span>
-                    <span v-else class="text-xs font-medium tracking-wide text-slate-400 italic bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">
-                        🔒 Identitas Surah Terkunci (Buka jawaban untuk melihat)
-                    </span>
-                </div>
-
                 <div class="text-center w-full max-w-3xl mx-auto">
-                    <!-- Perbaikan 2: Tampilan Basmalah Terpisah di Baris Sendiri -->
+                    
+                    <!-- Perbaikan 2: Kondisi Header Dinamis Swapping -->
+                    <div class="mb-6 min-h-[36px] flex items-center justify-center">
+                        <span v-if="!bantuanTerbuka.lanjutan" class="inline-block text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-4 py-1.5 rounded-full border border-amber-200">
+                            Lanjutkan Ayat Ini:
+                        </span>
+                        <span v-else class="inline-block text-xs md:text-sm font-bold tracking-wide text-emerald-700 bg-emerald-100 border border-emerald-200 px-5 py-2 rounded-full uppercase shadow-xs">
+                            QS. {{ dataSoalAktif.surahName }} : Ayat {{ dataSoalAktif.verseNumber }}
+                        </span>
+                    </div>
+
+                    <!-- Tampilan Basmalah Terpisah -->
                     <div v-if="dataSoalAktif.basmalah" :class="[fontTerpilih, 'text-3xl md:text-4xl text-slate-900 text-center mb-6 border-b border-slate-100 pb-4 tracking-wide']" dir="rtl">
                         {{ dataSoalAktif.basmalah }}
                     </div>
-
-                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full mb-6">Lanjutkan Ayat Ini:</span>
                     
-                    <!-- Area Teks Utama -->
+                    <!-- Blok Paragraf Utama Al-Qur'an -->
                     <p :class="[fontTerpilih, 'text-3xl md:text-4xl lg:text-5xl text-slate-900 leading-[2.5] lg:leading-[2.8] tracking-wide text-center']" dir="rtl">
                         <span>{{ dataSoalAktif.potonganSoal }}</span>
                         
-                        <!-- Perbaikan 1: Lanjutan menyatu sempurna berikut nomor ayatnya -->
-                        <span v-if="bantuanTerbuka.lanjutan" class="text-emerald-600 font-medium bg-emerald-50 px-1 rounded-lg transition-all duration-300">
+                        <!-- Perbaikan 1: Lanjutan Ayat beserta Nomor Ayat Soal Muncul Di Sini -->
+                        <span v-if="bantuanTerbuka.lanjutan" class="text-emerald-600 font-medium bg-emerald-50/60 px-1 rounded-lg">
                             {{ dataSoalAktif.lanjutanAyat }}
                         </span>
                     </p>
                 </div>
 
-                <!-- Terjemahan -->
+                <!-- Perbaikan 3: Terjemahan Gabungan Keseluruhan Ayat -->
                 <div v-if="bantuanTerbuka.arti" class="border-t border-dashed border-slate-200 pt-6 max-w-2xl mx-auto w-full">
-                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-3 py-1 rounded-full mb-3">Terjemahan Ayat (Kemenag):</span>
-                    <p class="text-sm md:text-base text-slate-600 italic leading-relaxed text-center">
-                        "{{ dataSoalAktif.arti }}"
+                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-3 py-1 rounded-full mb-3">Terjemahan Lengkap (Kemenag):</span>
+                    <p class="text-sm md:text-base text-slate-600 leading-relaxed text-justify md:text-center">
+                        {{ dataSoalAktif.arti }}
                     </p>
                 </div>
             </div>
@@ -236,7 +233,7 @@
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
-                // ================= ENGINE PARSING DATA & ATURAN URUTAN MUSHAF =================
+                // ================= ENGINE BACKEND KUIS =================
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
@@ -335,7 +332,6 @@
                         let ayatDipilih = soalDiacak[i - 1];
                         if(!ayatDipilih) break;
                         
-                        // Deteksi dan Pisahkan Basmalah jika berada di awal surat (kecuali Al-Fatihah & At-Tawbah)
                         const STR_BASMALAH = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
                         let teksArMurni = ayatDipilih.ar;
                         let basmalahTeks = "";
@@ -349,10 +345,13 @@
 
                         let soalTeks = '';
                         let kumpulanLanjutan = [];
+                        
+                        // Perbaikan 3: Masukkan arti ayat soal ke penampung array terjemahan
+                        let kumpulanArtiLanjutan = [`[QS. ${ayatDipilih.sname}: ${ayatDipilih.no}] ${ayatDipilih.id}`];
+                        
                         let totalKataLanjutan = 0;
                         const TARGET_KATA = 12; 
 
-                        // Ambil ayat berikutnya sebagai materi kelanjutan jawaban
                         let k = 1;
                         while (totalKataLanjutan < TARGET_KATA) {
                             let ayatBerikutnya = bankSoal.value.find(a => 
@@ -361,7 +360,11 @@
                             
                             if (ayatBerikutnya) {
                                 let jumlahKataAyatIni = ayatBerikutnya.ar.split(' ').length;
-                                kumpulanLanjutan.push(`${ayatBerikutnya.ar} ﴿${keAngkaArab(ayatBerikutnya.no)}﴾`);
+                                kumpulanLanjutan.push(`${ayatBerikutnya.ar} ﴿${keAngkaArab(ayatBerikutnya.no)} Bled}﴾`);
+                                
+                                // Gabungkan arti ayat kelanjutan
+                                kumpulanArtiLanjutan.push(`[Ayat ${ayatBerikutnya.no}] ${ayatBerikutnya.id}`);
+                                
                                 totalKataLanjutan += jumlahKataAyatIni;
                                 k++;
                             } else {
@@ -369,22 +372,24 @@
                             }
                         }
 
-                        let teksLanjutanFinal = kumpulanLanjutan.length > 0 ? ' ' + kumpulanLanjutan.join(' ') : '';
+                        // Bersihkan string tanda kurung manual dari looping kfgqpc hasil generator
+                        let stringLanjutanClean = kumpulanLanjutan.length > 0 
+                            ? ' ' + kumpulanLanjutan.join(' ').replace(/Bled/g, '') 
+                            : '';
 
+                        // Perbaikan 1 & 2: Pengkondisian Penempatan Tanda Nomor Ayat Soal
                         if (modeSoal.value === 'penuh') {
-                            // Perbaikan 1: Nomor ayat disuntikkan langsung setelah teks soal selesai
-                            soalTeks = `${teksArMurni} ﴿${keAngkaArab(ayatDipilih.no)}﴾`;
+                            soalTeks = teksArMurni; // Teks murni tanpa nomor ayat (agar tidak jadi clue)
+                            stringLanjutanClean = ` ﴿${keAngkaArab(ayatDipilih.no)}﴾` + stringLanjutanClean;
                         } else {
-                            // Mode Potongan Tengah Ayat
                             let kumpulanKata = teksArMurni.split(' ');
                             if (kumpulanKata.length > 4) {
                                 soalTeks = kumpulanKata.slice(0, 3).join(' ') + ' ...';
                                 let sisaKataAyatIni = kumpulanKata.slice(3).join(' ');
-                                
-                                // Nomor ayat disuntikkan di akhir kata pelengkap ayat tersebut sebelum lanjut ke ayat berikutnya
-                                teksLanjutanFinal = ` ${sisaKataAyatIni} ﴿${keAngkaArab(ayatDipilih.no)}﴾` + teksLanjutanFinal;
+                                stringLanjutanClean = ` ${sisaKataAyatIni} ﴿${keAngkaArab(ayatDipilih.no)}﴾` + stringLanjutanClean;
                             } else {
-                                soalTeks = `${teksArMurni} ﴿${keAngkaArab(ayatDipilih.no)}﴾`;
+                                soalTeks = teksArMurni;
+                                stringLanjutanClean = ` ﴿${keAngkaArab(ayatDipilih.no)}﴾` + stringLanjutanClean;
                             }
                         }
 
@@ -393,8 +398,8 @@
                             verseNumber: ayatDipilih.no,
                             basmalah: basmalahTeks,
                             potonganSoal: soalTeks,
-                            lanjutanAyat: teksLanjutanFinal,
-                            arti: ayatDipilih.id
+                            lanjutanAyat: stringLanjutanClean,
+                            arti: kumpulanArtiLanjutan.join(' ') // Hasil gabungan terjemahan multi-ayat
                         };
                     }
                 };
