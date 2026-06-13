@@ -37,7 +37,7 @@
         <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
             <p class="font-semibold text-lg">{{ teksLoading }}</p>
-            <p class="text-xs text-slate-300 mt-1">Sistem sedang mengompresi data agar memori tetap ringan.</p>
+            <p class="text-xs text-slate-300 mt-1">Sistem sedang memproses data materi.</p>
         </div>
 
         <!-- Layar Dashboard -->
@@ -95,12 +95,12 @@
                 <h2 class="text-lg font-bold text-slate-700 bg-white px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm">Soal #{{ nomorTerpilih }}</h2>
             </div>
 
-            <!-- Box Utama Teks Ayat Premium (Optimal untuk Mobile maupun PC Desktop Wide) -->
+            <!-- Box Utama Teks Ayat Premium -->
             <div class="bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-12 flex-1 flex flex-col justify-center space-y-8">
                 
                 <div class="text-center w-full max-w-3xl mx-auto">
                     
-                    <!-- Perbaikan 2: Kondisi Header Dinamis Swapping -->
+                    <!-- Kondisi Header Dinamis Swapping -->
                     <div class="mb-6 min-h-[36px] flex items-center justify-center">
                         <span v-if="!bantuanTerbuka.lanjutan" class="inline-block text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-4 py-1.5 rounded-full border border-amber-200">
                             Lanjutkan Ayat Ini:
@@ -119,19 +119,26 @@
                     <p :class="[fontTerpilih, 'text-3xl md:text-4xl lg:text-5xl text-slate-900 leading-[2.5] lg:leading-[2.8] tracking-wide text-center']" dir="rtl">
                         <span>{{ dataSoalAktif.potonganSoal }}</span>
                         
-                        <!-- Perbaikan 1: Lanjutan Ayat beserta Nomor Ayat Soal Muncul Di Sini -->
+                        <!-- Lanjutan Ayat Bersih Bersambung Sempurna -->
                         <span v-if="bantuanTerbuka.lanjutan" class="text-emerald-600 font-medium bg-emerald-50/60 px-1 rounded-lg">
                             {{ dataSoalAktif.lanjutanAyat }}
                         </span>
                     </p>
                 </div>
 
-                <!-- Perbaikan 3: Terjemahan Gabungan Keseluruhan Ayat -->
+                <!-- Perbaikan Struktur Tampilan Terjemahan Ayat Rapi Berbaris -->
                 <div v-if="bantuanTerbuka.arti" class="border-t border-dashed border-slate-200 pt-6 max-w-2xl mx-auto w-full">
-                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-3 py-1 rounded-full mb-3">Terjemahan Lengkap (Kemenag):</span>
-                    <p class="text-sm md:text-base text-slate-600 leading-relaxed text-justify md:text-center">
-                        {{ dataSoalAktif.arti }}
-                    </p>
+                    <span class="inline-block text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-3 py-1 rounded-full mb-4">Terjemahan Lengkap (Kemenag):</span>
+                    
+                    <div class="text-sm md:text-base text-slate-600 space-y-2.5 text-left md:text-center">
+                        <!-- Baris 1: Nama Surat -->
+                        <p class="font-bold text-slate-800 text-base">QS. {{ dataSoalAktif.surahName }}</p>
+                        
+                        <!-- Baris Berikutnya: List nomor ayat dan artinya -->
+                        <p v-for="(artiAyat, index) in dataSoalAktif.artiList" :key="index" class="leading-relaxed">
+                            <span class="font-bold text-emerald-700">({{ artiAyat.nomor }})</span> {{ artiAyat.teks }}
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -223,7 +230,7 @@
                 const soalPerNomor = ref({}); 
                 
                 const bantuanTerbuka = ref({ lanjutan: false, arti: false });
-                const dataSoalAktif = ref({ surahName: '', verseNumber: '', basmalah: '', potonganSoal: '', lanjutanAyat: '', arti: '' });
+                const dataSoalAktif = ref({ surahName: '', verseNumber: '', basmalah: '', potonganSoal: '', lanjutanAyat: '', artiList: [] });
 
                 const pilihSemuaJuz = () => { pilihanJuz.value = Array.from({ length: 30 }, (_, i) => i + 1); };
                 const kosongkanJuz = () => { pilihanJuz.value = []; };
@@ -233,7 +240,6 @@
                     return String(num).split('').map(digit => angkaArab[parseInt(digit)]).join('');
                 };
 
-                // ================= ENGINE BACKEND KUIS =================
                 const unduhDanSimpanPengaturan = async () => {
                     if (pilihanJuz.value.length === 0) {
                         alert("Minimal pilih 1 Juz untuk memulai!");
@@ -346,8 +352,10 @@
                         let soalTeks = '';
                         let kumpulanLanjutan = [];
                         
-                        // Perbaikan 3: Masukkan arti ayat soal ke penampung array terjemahan
-                        let kumpulanArtiLanjutan = [`[QS. ${ayatDipilih.sname}: ${ayatDipilih.no}] ${ayatDipilih.id}`];
+                        // Membuat array struktur objek terjemahan berbaris
+                        let penampungArti = [
+                            { nomor: ayatDipilih.no, teks: ayatDipilih.id }
+                        ];
                         
                         let totalKataLanjutan = 0;
                         const TARGET_KATA = 12; 
@@ -360,10 +368,10 @@
                             
                             if (ayatBerikutnya) {
                                 let jumlahKataAyatIni = ayatBerikutnya.ar.split(' ').length;
-                                kumpulanLanjutan.push(`${ayatBerikutnya.ar} ﴿${keAngkaArab(ayatBerikutnya.no)} Bled}﴾`);
+                                kumpulanLanjutan.push(`${ayatBerikutnya.ar} ﴿${keAngkaArab(ayatBerikutnya.no)}﴾`);
                                 
-                                // Gabungkan arti ayat kelanjutan
-                                kumpulanArtiLanjutan.push(`[Ayat ${ayatBerikutnya.no}] ${ayatBerikutnya.id}`);
+                                // Push data struktur terjemahan berbaris
+                                penampungArti.push({ nomor: ayatBerikutnya.no, teks: ayatBerikutnya.id });
                                 
                                 totalKataLanjutan += jumlahKataAyatIni;
                                 k++;
@@ -372,14 +380,11 @@
                             }
                         }
 
-                        // Bersihkan string tanda kurung manual dari looping kfgqpc hasil generator
-                        let stringLanjutanClean = kumpulanLanjutan.length > 0 
-                            ? ' ' + kumpulanLanjutan.join(' ').replace(/Bled/g, '') 
-                            : '';
+                        let stringLanjutanClean = kumpulanLanjutan.length > 0 ? ' ' + kumpulanLanjutan.join(' ') : '';
 
-                        // Perbaikan 1 & 2: Pengkondisian Penempatan Tanda Nomor Ayat Soal
+                        // Penanganan presisi mode kuis tanpa kebocoran string simbol hantu
                         if (modeSoal.value === 'penuh') {
-                            soalTeks = teksArMurni; // Teks murni tanpa nomor ayat (agar tidak jadi clue)
+                            soalTeks = teksArMurni; 
                             stringLanjutanClean = ` ﴿${keAngkaArab(ayatDipilih.no)}﴾` + stringLanjutanClean;
                         } else {
                             let kumpulanKata = teksArMurni.split(' ');
@@ -399,7 +404,7 @@
                             basmalah: basmalahTeks,
                             potonganSoal: soalTeks,
                             lanjutanAyat: stringLanjutanClean,
-                            arti: kumpulanArtiLanjutan.join(' ') // Hasil gabungan terjemahan multi-ayat
+                            artiList: penampungArti
                         };
                     }
                 };
