@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mufradat Pro - Latihan & Ujian Juz 30</title>
+    <title>Mufradat Pro - Latihan & Ujian Kustom Juz 30</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
         
         @font-face {
             font-family: 'MushafMadinah';
-            src: url('https://cdn.jsdelivr.net/gh/scisneromam/Uthmanic-Fonts/UthmanicHafs%20V20.woff2') format('woff2');
+            src: url('https://cdn.jsdelivr.gh/gh/scisneromam/Uthmanic-Fonts/UthmanicHafs%20V20.woff2') format('woff2');
             font-weight: normal; font-style: normal;
         }
 
@@ -31,12 +31,14 @@
 
     <div id="app" class="max-w-md mx-auto p-4 md:max-w-4xl lg:max-w-5xl min-h-screen flex flex-col justify-center py-6 md:py-12">
         
+        <!-- Global Loading Screen -->
         <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
             <p class="font-semibold text-lg">{{ teksLoading }}</p>
             <p class="text-xs text-slate-300 mt-1">Sistem sedang memproses database kata Quran.com v4...</p>
         </div>
 
+        <!-- LAYAR 1: PILIHAN MENU UTAMA (PEMBUKA) -->
         <div v-if="layarAktif === 'pembuka'" class="w-full max-w-2xl mx-auto text-center space-y-8 py-12">
             <div class="space-y-2">
                 <span class="px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider">Aplikasi Tahfiz Modern</span>
@@ -45,27 +47,30 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <!-- Card Mode Latihan -->
                 <div @click="masukModeLatihan" class="bg-white border-2 border-slate-200 hover:border-indigo-500 rounded-3xl p-6 text-left shadow-sm hover:shadow-xl transition duration-300 cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="text-3xl mb-4 group-hover:animate-bounce">🧩</div>
                         <h3 class="text-xl font-bold text-slate-800 mb-2">Mode Latihan</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">Uji hafalan santai melalui 12 kotak misteri. Bebas pilih banyak surah sekaligus tanpa batasan waktu dan nilai akhir.</p>
+                        <p class="text-xs text-slate-500 leading-relaxed">Uji hafalan acak melalui 12 kotak misteri. Bebas pilih banyak surah sekaligus tanpa batasan rentang ayat khusus.</p>
                     </div>
                     <span class="mt-6 text-xs font-bold text-indigo-600 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">Mulai Belajar &rarr;</span>
                 </div>
 
-                <div @click="masukModeUjian" class="bg-white border-2 border-slate-200 hover:border-emerald-500 rounded-3xl p-6 text-left shadow-sm hover:shadow-xl transition duration-300 cursor-pointer group flex flex-col justify-between">
+                <!-- Card Mode Ujian -->
+                <div @click="layarAktif = 'ujian_config'" class="bg-white border-2 border-slate-200 hover:border-emerald-500 rounded-3xl p-6 text-left shadow-sm hover:shadow-xl transition duration-300 cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="text-3xl mb-4 group-hover:animate-bounce">⏱️</div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2">Mode Ujian / Tes</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">Uji kompetensi terstruktur. Tentukan satu surah, batasi jangkauan ayatnya, tentukan jumlah soal, dan dapatkan skor hasil kelulusan.</p>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Mode Ujian Kustom</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Tentukan jumlah soal sendiri, isi tiap kotak dengan target surah dan rentang ayat spesifik pilihan Anda, lalu uji via dashboard kotak.</p>
                     </div>
-                    <span class="mt-6 text-xs font-bold text-emerald-600 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">Mulai Ujian &rarr;</span>
+                    <span class="mt-6 text-xs font-bold text-emerald-600 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">Masuk Setup Ujian &rarr;</span>
                 </div>
             </div>
         </div>
 
 
+        <!-- LAYAR 2A: DASHBOARD MODE LATIHAN -->
         <div v-if="layarAktif === 'latihan_dashboard'" class="w-full flex-1 flex flex-col py-4 justify-between">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -82,6 +87,7 @@
                 <div class="text-xs text-indigo-900/80 line-clamp-2">Surah Aktif ({{ surahTerpilihIds.length }} Terpilih): <span class="font-bold text-indigo-700">{{ teksRingkasanSurah }}</span></div>
             </div>
 
+            <!-- Grid 12 Nomor Latihan -->
             <div class="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 my-auto">
                 <button v-for="no in 12" :key="no" @click="pilihNomorLatihan(no)" :disabled="nomorHangusLatihan.includes(no)" :class="['h-24 text-2xl font-bold rounded-2xl transition flex items-center justify-center shadow-sm', nomorHangusLatihan.includes(no) ? 'bg-slate-200 text-slate-400 cursor-not-allowed border-2 border-transparent opacity-70' : 'bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white active:scale-95 cursor-pointer']">
                     {{ no }}
@@ -90,6 +96,7 @@
         </div>
 
 
+        <!-- LAYAR 2B: SOAL MODE LATIHAN / GENERAL -->
         <div v-if="layarAktif === 'latihan_soal'" class="w-full flex-1 flex flex-col py-4">
             <div class="flex items-center justify-between mb-6">
                 <button @click="layarAktif = 'latihan_dashboard'" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm flex items-center gap-2 shadow-sm cursor-pointer">← Kembali</button>
@@ -102,10 +109,8 @@
                         <h3 class="text-xl font-bold text-slate-800">Surah {{ dataSoalAktif.surahName }}</h3>
                         <p class="text-xs font-semibold text-slate-500 mt-0.5">Ayat: {{ dataSoalAktif.startVerse }} - {{ dataSoalAktif.endVerse }}</p>
                     </div>
-
                     <div v-if="!kunciTerbuka" class="pt-4"><button @click="kunciTerbuka = true" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg cursor-pointer">📖 Buka Arti Per Kata</button></div>
-
-                    <div v-if="kunciTerbuka" class="pt-4 animate-fadeIn">
+                    <div v-if="kunciTerbuka" class="pt-4">
                         <div class="flex flex-row flex-wrap justify-start items-stretch gap-x-3 gap-y-5 w-full bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200" dir="rtl">
                             <template v-for="(item, idx) in listKataFlat" :key="idx">
                                 <div v-if="item.jenis === 'kata'" class="bg-white border border-slate-200 rounded-xl p-2.5 min-w-[75px] md:min-w-[95px] flex flex-col items-center justify-between shadow-xs">
@@ -113,7 +118,7 @@
                                     <span class="text-[10px] md:text-xs text-slate-500 font-semibold text-center" dir="ltr">{{ item.arti }}</span>
                                 </div>
                                 <div v-else-if="item.jenis === 'nomor_ayat'" class="flex items-center justify-center px-1 self-center">
-                                    <span :class="[fontTerpilih, 'text-xl md:text-2xl text-indigo-600 font-bold bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-xl shadow-xs']">﴿{{ item.angkaArab }}﴾</span>
+                                    <span :class="[fontTerpilih, 'text-xl md:text-2xl text-indigo-600 font-bold bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-xl']">﴿{{ item.angkaArab }}﴾</span>
                                 </div>
                             </template>
                         </div>
@@ -123,91 +128,129 @@
         </div>
 
 
-        <div v-if="layarAktif === 'ujian_config'" class="w-full max-w-xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-6">
+        <!-- LAYAR 3A: CONFIG PANEL UTK UJIAN (DYNAMIC INPUT FIELD GENERATOR) -->
+        <div v-if="layarAktif === 'ujian_config'" class="w-full max-w-2xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-6">
             <div>
-                <button @click="layarAktif = 'pembuka'" class="text-xs font-bold text-slate-500 hover:text-emerald-600 mb-1 block">&larr; Kembali</button>
-                <h2 class="text-2xl font-bold text-slate-900">⏱️ Pengaturan Ruang Ujian</h2>
-                <p class="text-xs text-slate-500">Tentukan materi target ayat dan batasan kuantitas soal ujian Anda.</p>
+                <button @click="layarAktif = 'pembuka'" class="text-xs font-bold text-slate-500 hover:text-emerald-600 mb-1 block">&larr; Kembali Menu Utama</button>
+                <h2 class="text-2xl font-bold text-slate-900">⏱️ Pembuat Paket Ujian Kustom</h2>
+                <p class="text-xs text-slate-500">Tentukan kuantitas soal, lalu isi detail surah serta rentang materi ayat pada masing-masing kotak.</p>
             </div>
 
-            <div class="space-y-4">
+            <!-- Langkah 1: Pilih Jumlah Soal -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">1. Pilih Surah Ujian:</label>
-                    <select v-model="configUjian.surahId" @change="sinkronisasiBatasAyatUjian" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-sm focus:outline-indigo-500">
-                        <option v-for="s in listSurahJuz30" :key="s.id" :value="s.id">Surah {{ s.id }}. {{ s.name }} ({{ s.verseCount }} Ayat)</option>
-                    </select>
+                    <label class="block text-xs font-bold text-slate-700 uppercase">1. Tentukan Jumlah Kotak Soal:</label>
+                    <span class="text-[11px] text-slate-400 font-medium">Batas minimal 1 soal, maksimal hingga 10 soal sekaligus.</span>
                 </div>
+                <input type="number" v-model.number="jumlahSoalUjian" :min="1" :max="10" class="w-24 p-2.5 bg-white border border-slate-300 rounded-xl text-center font-bold text-lg text-emerald-700 focus:outline-emerald-500 shadow-xs">
+            </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Ayat Mulai:</label>
-                        <input type="number" v-model.number="configUjian.ayatMulai" :min="1" :max="configUjian.maxAyatSurah" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-bold">
+            <!-- Langkah 2: Render Dynamic Inputs Form Row -->
+            <div class="space-y-4 max-h-96 overflow-y-auto custom-scroll pr-1">
+                <label class="block text-xs font-bold text-slate-600 uppercase">2. Konfigurasi Konten Tiap Kotak:</label>
+                
+                <div v-for="(row, idx) in listConfigSoalUjian" :key="idx" class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 relative hover:border-emerald-400 transition">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">Kotak Soal #{{ idx + 1 }}</span>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Ayat Selesai:</label>
-                        <input type="number" v-model.number="configUjian.ayatSelesai" :min="configUjian.ayatMulai" :max="configUjian.maxAyatSurah" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-bold">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-2">3. Jumlah Pertanyaan Ujian:</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button v-for="jml in [3, 5, 10, 15]" :key="jml" @click="configUjian.jumlahSoal = jml" :class="['p-3 rounded-xl border text-xs font-bold transition text-center', configUjian.jumlahSoal === jml ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600']">
-                            {{ jml }} Soal
-                        </button>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Pilih Surah:</label>
+                            <select v-model="row.surahId" @change="onSurahUjianRowChange(idx)" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:bg-white">
+                                <option v-for="s in listSurahJuz30" :key="s.id" :value="s.id">Surah {{ s.id }}. {{ s.name }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Ayat Mulai:</label>
+                            <input type="number" v-model.number="row.ayatMulai" :min="1" :max="row.maxAyatSurah" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-center font-bold text-slate-700 focus:bg-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Ayat Selesai (Maks {{ row.maxAyatSurah }}):</label>
+                            <input type="number" v-model.number="row.ayatSelesai" :min="row.ayatMulai" :max="row.maxAyatSurah" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-center font-bold text-slate-700 focus:bg-white">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <button @click="generateMateriUjian" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition tracking-wide text-sm cursor-pointer">
-                🚀 Mulai Ujian Sekarang
+            <!-- Langkah 3: Simpan Setting -->
+            <button @click="generateMateriUjianKustom" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition tracking-wide text-sm cursor-pointer">
+                💾 Simpan Pengaturan & Buka Dashboard Ujian
             </button>
         </div>
 
 
+        <!-- LAYAR 3B: DASHBOARD MODE UJIAN (PERSIS SEPERTI MODEL LATIHAN) -->
+        <div v-if="layarAktif === 'ujian_dashboard'" class="w-full flex-1 flex flex-col py-4 justify-between">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <button @click="layarAktif = 'ujian_config'" class="text-xs font-bold text-slate-500 hover:text-emerald-600 mb-1 block">&larr; Setting Pengaturan</button>
+                    <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">⏱️ Dashboard Ujian Kustom</h1>
+                </div>
+                <button @click="layarAktif = 'ujian_config'" class="p-3 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer">
+                    ⚙️ Ubah Cakupan Ayat
+                </button>
+            </div>
+
+            <div class="bg-emerald-50 text-emerald-900 p-4 rounded-xl mb-6 text-xs border border-emerald-100 shadow-sm font-medium">
+                Sistem ujian kustom aktif. Silakan buka masing-masing kotak rahasia di bawah ini secara mandiri untuk menguji hafalan terjemahan kata Anda.
+            </div>
+
+            <!-- Grid Dinamis Mengikuti Berapa Jumlah Inputan Soal yang Ditentukan Pengguna -->
+            <div class="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 my-auto">
+                <button 
+                    v-for="no in jumlahSoalUjian" 
+                    :key="no" 
+                    @click="pilihNomorUjian(no)" 
+                    :disabled="nomorHangusUjian.includes(no)" 
+                    :class="[
+                        'h-24 text-2xl font-bold rounded-2xl transition flex flex-col items-center justify-center gap-0.5 shadow-sm', 
+                        nomorHangusUjian.includes(no) 
+                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed border-2 border-transparent opacity-70' 
+                            : 'bg-white border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white active:scale-95 cursor-pointer'
+                    ]"
+                >
+                    <span class="text-2xl font-bold">{{ no }}</span>
+                    <span class="text-[9px] uppercase tracking-wider font-bold" :class="nomorHangusUjian.includes(no) ? 'text-slate-400' : 'text-emerald-500/80 group-hover:text-white'">Soal</span>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- LAYAR 3C: TAMPILAN SOAL JALANNYA UJIAN (LAYOUT SAMA SEPERTI MODEL LATIHAN) -->
         <div v-if="layarAktif === 'ujian_soal'" class="w-full flex-1 flex flex-col py-4">
             <div class="flex items-center justify-between mb-6">
-                <span class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 text-xs">
-                    Progress: {{ indeksUjianAktif + 1 }} / {{ bankSoalUjian.length }} Soal
-                </span>
-                <div class="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div class="bg-emerald-500 h-full transition-all" :style="{ width: ((indeksUjianAktif + 1) / bankSoalUjian.length * 100) + '%' }"></div>
-                </div>
+                <button @click="layarAktif = 'ujian_dashboard'" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm flex items-center gap-2 shadow-sm cursor-pointer">
+                    ← Kembali Ke Dashboard Ujian
+                </button>
+                <h2 class="text-lg font-bold text-emerald-700 bg-white px-5 py-2.5 rounded-xl border border-emerald-200 shadow-sm">Ujian Kotak #{{ nomorTerpilihUjian }}</h2>
             </div>
 
             <div class="bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-12 flex-1 flex flex-col justify-center space-y-8">
                 <div class="text-center w-full max-w-4xl mx-auto space-y-6">
-                    <div class="text-center">
-                        <span class="text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">Ujian: Surah {{ dataSoalUjianAktif.surahName }}</span>
-                        <h4 class="text-sm font-semibold text-slate-400 mt-2">Terjemahkan potongan ayat berikut di dalam hati Anda:</h4>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 max-w-xl mx-auto shadow-xs">
+                        <h3 class="text-xl font-bold text-slate-800">Surah {{ dataSoalUjianAktif.surahName }}</h3>
+                        <p class="text-xs font-semibold text-slate-500 mt-0.5">Materi Jangkauan: Ayat {{ dataSoalUjianAktif.startVerse }} sampai {{ dataSoalUjianAktif.endVerse }}</p>
                     </div>
 
-                    <div class="flex flex-row flex-wrap justify-start items-stretch gap-x-3 gap-y-5 w-full bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200" dir="rtl">
-                        <template v-for="(item, idx) in listKataUjianFlat" :key="idx">
-                            <div v-if="item.jenis === 'kata'" class="bg-white border border-slate-200 rounded-xl p-2.5 min-w-[75px] md:min-w-[95px] flex flex-col items-center justify-center shadow-xs">
-                                <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-slate-900 font-medium']">{{ item.arab }}</span>
-                                <span v-if="kunciTerbukaUjian" class="text-[10px] md:text-xs text-amber-600 font-bold text-center mt-2 pt-2 border-t border-dashed border-slate-200 w-full" dir="ltr">
-                                    {{ item.arti }}
-                                </span>
-                            </div>
-                            <div v-else-if="item.jenis === 'nomor_ayat'" class="flex items-center justify-center px-1 self-center">
-                                <span :class="[fontTerpilih, 'text-xl md:text-2xl text-slate-400 font-bold bg-slate-200/60 px-2.5 py-1 rounded-xl']">﴿{{ item.angkaArab }}﴾</span>
-                            </div>
-                        </template>
-                    </div>
-
-                    <div class="pt-4 flex justify-center w-full">
-                        <button v-if="!kunciTerbukaUjian" @click="kunciTerbukaUjian = true" class="px-8 py-3.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md text-sm cursor-pointer">
-                            👀 Buka Kunci Jawaban Arti
+                    <div v-if="!kunciTerbukaUjian" class="pt-4">
+                        <button @click="kunciTerbukaUjian = true" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg cursor-pointer">
+                            📖 Tampilkan Teks Al-Qur'an & Terjemah Kata
                         </button>
+                    </div>
 
-                        <div v-else class="grid grid-cols-2 gap-4 w-full max-w-md animate-fadeIn">
-                            <button @click="jawabUjian(false)" class="p-4 bg-rose-50 border-2 border-rose-200 hover:border-rose-500 text-rose-700 rounded-2xl font-bold flex flex-col items-center justify-center gap-1 cursor-pointer">
-                                <span class="text-xl">❌</span> <span class="text-xs">Tebakan Saya Salah</span>
-                            </button>
-                            <button @click="jawabUjian(true)" class="p-4 bg-emerald-50 border-2 border-emerald-200 hover:border-emerald-500 text-emerald-700 rounded-2xl font-bold flex flex-col items-center justify-center gap-1 cursor-pointer">
-                                <span class="text-xl">🟢</span> <span class="text-xs">Tebakan Saya Benar</span>
-                            </button>
+                    <!-- Tampilan Lembar Paragraf Kontinu Gaya Lembaran Cetak Alquran -->
+                    <div v-if="kunciTerbukaUjian" class="pt-4 animate-fadeIn">
+                        <div class="flex flex-row flex-wrap justify-start items-stretch gap-x-3 gap-y-5 w-full bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200" dir="rtl">
+                            <template v-for="(item, idx) in listKataUjianFlat" :key="idx">
+                                <div v-if="item.jenis === 'kata'" class="bg-white border border-slate-200 rounded-xl p-2.5 min-w-[75px] md:min-w-[95px] flex flex-col items-center justify-between shadow-xs">
+                                    <span :class="[fontTerpilih, 'text-2xl md:text-3xl text-slate-900 font-medium mb-2']">{{ item.arab }}</span>
+                                    <span class="text-[10px] md:text-xs text-slate-500 font-semibold text-center" dir="ltr">{{ item.arti }}</span>
+                                </div>
+                                <div v-else-if="item.jenis === 'nomor_ayat'" class="flex items-center justify-center px-1 self-center">
+                                    <span :class="[fontTerpilih, 'text-xl md:text-2xl text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-xl shadow-xs']">﴿{{ item.angkaArab }}﴾</span>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -215,53 +258,7 @@
         </div>
 
 
-        <div v-if="layarAktif === 'ujian_hasil'" class="w-full max-w-md mx-auto bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl text-center space-y-6">
-            <div class="space-y-1">
-                <span class="text-3xl">📜</span>
-                <h2 class="text-2xl font-bold text-slate-900">Hasil Ujian Tahfiz</h2>
-                <p class="text-xs text-slate-500">Analisis penguasaan mufradat terjemah per kata</p>
-            </div>
-
-            <div class="w-32 h-32 rounded-full mx-auto flex flex-col items-center justify-center border-4 border-slate-100 shadow-lg" :class="predikatKelulusan.warnaBg">
-                <span class="text-4xl font-extrabold" :class="predikatKelulusan.warnaTeks">{{ nilaiUjian }}</span>
-                <span class="text-[10px] font-bold tracking-wider uppercase mt-0.5 opacity-80" :class="predikatKelulusan.warnaTeks">Skor Akhir</span>
-            </div>
-
-            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2 text-sm text-left font-medium">
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Surah Diuji:</span>
-                    <span class="font-bold text-slate-800">{{ predikatKelulusan.namaSurah }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Rentang Ayat:</span>
-                    <span class="font-bold text-slate-800">Ayat {{ configUjian.ayatMulai }} - {{ configUjian.ayatSelesai }}</span>
-                </div>
-                <hr class="border-slate-200 my-1">
-                <div class="flex justify-between text-xs">
-                    <span class="text-emerald-600 font-bold">🟢 Jawaban Benar:</span>
-                    <span class="font-bold text-emerald-700">{{ skorUjianBenar }} Soal</span>
-                </div>
-                <div class="flex justify-between text-xs">
-                    <span class="text-rose-600 font-bold">❌ Jawaban Salah:</span>
-                    <span class="font-bold text-rose-700">{{ bankSoalUjian.length - skorUjianBenar }} Soal</span>
-                </div>
-            </div>
-
-            <div class="p-3 rounded-xl text-xs font-bold" :class="predikatKelulusan.warnaBg + ' ' + predikatKelulusan.warnaTeks">
-                Predikat: {{ predikatKelulusan.teks }}
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-2">
-                <button @click="layarAktif = 'ujian_config'" class="p-3 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">
-                    Ujian Baru
-                </button>
-                <button @click="layarAktif = 'pembuka'" class="p-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition shadow-md cursor-pointer">
-                    Menu Utama
-                </button>
-            </div>
-        </div>
-
-
+        <!-- Modal Filter Surah Khusus Mode Latihan -->
         <div v-if="tampilkanModalLatihan" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40">
             <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl">
                 <div class="flex justify-between items-center mb-2">
@@ -305,7 +302,7 @@
     </div>
 
     <script>
-        const { createApp, ref, onMounted, computed } = Vue;
+        const { createApp, ref, onMounted, computed, watch } = Vue;
 
         createApp({
             setup() {
@@ -356,7 +353,7 @@
                 ]);
 
                 // ============================================
-                // STATE & ENGINE UNTUK MODE LATIHAN (12 KOTAK)
+                // ENGINE MODE LATIHAN
                 // ============================================
                 const tampilkanModalLatihan = ref(false);
                 const surahTerpilihIds = ref([93, 108, 112, 114]); 
@@ -368,7 +365,6 @@
 
                 const pilihSemuaSurah = () => { surahTerpilihIds.value = listSurahJuz30.value.map(s => s.id); };
                 const kosongkanSemuaSurah = () => { surahTerpilihIds.value = []; };
-                
                 const teksRingkasanSurah = computed(() => {
                     if (surahTerpilihIds.value.length === 0) return "Belum ada surah terpilih";
                     if (surahTerpilihIds.value.length === listSurahJuz30.value.length) return "Seluruh Surah Juz 30 (37 Surah)";
@@ -439,14 +435,39 @@
 
 
                 // ============================================
-                // STATE & ENGINE UNTUK MODE UJIAN (TERSTRUKTUR)
+                // REKAYASA TOTAL: ENGINE MODE UJIAN KUSTOM BOX
                 // ============================================
-                const configUjian = ref({ surahId: 78, ayatMulai: 1, ayatSelesai: 10, maxAyatSurah: 40, jumlahSoal: 5 });
-                const bankSoalUjian = ref([]);
-                const indeksUjianAktif = ref(0);
-                const skorUjianBenar = ref(0);
+                const jumlahSoalUjian = ref(4); // Default 4 soal sesuai permisalan user
+                const listConfigSoalUjian = ref([]);
+                const bankSoalUjian = ref({});
+                const nomorTerpilihUjian = ref(null);
+                const nomorHangusUjian = ref([]);
                 const dataSoalUjianAktif = ref({});
                 const kunciTerbukaUjian = ref(false);
+
+                // Watcher otomatis menambah/mengurangi form row input jika nilai jumlahSoalUjian berubah
+                watch(jumlahSoalUjian, (newVal) => {
+                    if (newVal < 1) jumlahSoalUjian.value = 1;
+                    if (newVal > 10) jumlahSoalUjian.value = 10;
+                    
+                    const targetVal = Math.min(Math.max(newVal, 1), 10);
+                    while (listConfigSoalUjian.value.length < targetVal) {
+                        listConfigSoalUjian.value.push({ surahId: 78, ayatMulai: 1, ayatSelesai: 5, maxAyatSurah: 40 });
+                    }
+                    if (listConfigSoalUjian.value.length > targetVal) {
+                        listConfigSoalUjian.value.splice(targetVal);
+                    }
+                }, { immediate: true });
+
+                const onSurahUjianRowChange = (idx) => {
+                    let row = listConfigSoalUjian.value[idx];
+                    let sRef = listSurahJuz30.value.find(s => s.id === row.surahId);
+                    if (sRef) {
+                        row.maxAyatSurah = sRef.verseCount;
+                        row.ayatMulai = 1;
+                        row.ayatSelesai = Math.min(5, sRef.verseCount);
+                    }
+                };
 
                 const listKataUjianFlat = computed(() => {
                     if (!dataSoalUjianAktif.value || !dataSoalUjianAktif.value.listAyatData) return [];
@@ -458,95 +479,75 @@
                     return hasilFlat;
                 });
 
-                const nilaiUjian = computed(() => {
-                    if (bankSoalUjian.value.length === 0) return 0;
-                    return Math.round((skorUjianBenar.value / bankSoalUjian.value.length) * 100);
-                });
-
-                const predikatKelulusan = computed(() => {
-                    let sRef = listSurahJuz30.value.find(s => s.id === configUjian.value.surahId);
-                    let namaS = sRef ? sRef.name : "";
-                    let n = nilaiUjian.value;
-                    if (n >= 90) return { teks: "MUMTAZ (Istimewa) 🎉", warnaBg: "bg-emerald-100", warnaTeks: "text-emerald-700", namaSurah: namaS };
-                    if (n >= 75) return { teks: "JAYYID JIDDAN (Sangat Baik) 👍", warnaBg: "bg-teal-100", warnaTeks: "text-teal-700", namaSurah: namaS };
-                    if (n >= 60) return { teks: "JAYYID (Baik) 🌟", warnaBg: "bg-amber-100", warnaTeks: "text-amber-700", namaSurah: namaS };
-                    return { teks: "MAQBUL (Cukup / Harus Murojaah Lagi) 📚", warnaBg: "bg-rose-100", warnaTeks: "text-rose-700", namaSurah: namaS };
-                });
-
-                const masukModeUjian = () => {
-                    layarAktif.value = 'ujian_config';
-                    sinkronisasiBatasAyatUjian();
-                };
-
-                const sinkronisasiBatasAyatUjian = () => {
-                    let surahObj = listSurahJuz30.value.find(s => s.id === configUjian.value.surahId);
-                    if (surahObj) {
-                        configUjian.value.maxAyatSurah = surahObj.verseCount;
-                        configUjian.value.ayatMulai = 1;
-                        configUjian.value.ayatSelesai = Math.min(10, surahObj.verseCount);
-                    }
-                };
-
-                const generateMateriUjian = async () => {
-                    if (configUjian.value.ayatMulai > configUjian.value.ayatSelesai) {
-                        alert("Ayat Mulai tidak boleh lebih besar dari Ayat Selesai!"); return;
-                    }
-                    sedangLoading.value = true;
-                    teksLoading.value = "Menyiapkan lembar soal ujian...";
-                    
-                    try {
-                        const url = `https://api.quran.com/api/v4/verses/by_chapter/${configUjian.value.surahId}?language=id&words=true&word_fields=text_uthmani&per_page=150`;
-                        const data = await fetch(url).then(res => res.json());
-                        const infoSurahRef = listSurahJuz30.value.find(s => s.id === configUjian.value.surahId);
-
-                        // Filter ayat berdasarkan range yang ditentukan user secara ketat
-                        let poolAyatUjian = data.verses.filter(v => 
-                            v.verse_number >= configUjian.value.ayatMulai && v.verse_number <= configUjian.value.ayatSelesai
-                        ).map(v => ({ ...v, surah_id: configUjian.value.surahId, surah_name: infoSurahRef ? infoSurahRef.name : "Surah" }));
-
-                        if (poolAyatUjian.length === 0) { alert("Tidak ada data ayat pada rentang tersebut."); return; }
-
-                        // Acak urutan ayat ujian
-                        let poolDiacak = [...poolAyatUjian].sort(() => 0.5 - Math.random());
-                        bankSoalUjian.value = [];
-
-                        // Tentukan kuantitas final soal agar tidak melebih pool range yang tersedia
-                        let finalJumlahSoal = Math.min(configUjian.value.jumlahSoal, poolDiacak.length);
-
-                        for (let i = 0; i < finalJumlahSoal; i++) {
-                            let itemAyatMurni = poolDiacak[i];
-                            let listWordsOlah = itemAyatMurni.words.filter(w => w.char_type_name === 'word').map(w => ({ arabic: w.text_uthmani, translation: w.translation.text.replace(/<\/?[^>]+(>|$)/g, "") }));
-                            
-                            bankSoalUjian.value.push({
-                                surahName: itemAyatMurni.surah_name,
-                                startVerse: itemAyatMurni.verse_number,
-                                endVerse: itemAyatMurni.verse_number,
-                                listAyatData: [{ verseNumber: itemAyatMurni.verse_number, verseNumberArab: keAngkaArab(itemAyatMurni.verse_number), words: listWordsOlah }]
-                            });
+                // Proses Ambil Data API berdasarkan settingan baris demi baris secara akurat
+                const generateMateriUjianKustom = async () => {
+                    // Validasi logika rentang inputan ayat
+                    for (let i = 0; i < listConfigSoalUjian.value.length; i++) {
+                        let r = listConfigSoalUjian.value[i];
+                        if (r.ayatMulai > r.ayatSelesai) {
+                            alert(`Error Kotak #${i+1}: Ayat Mulai tidak boleh melampaui nilai Ayat Selesai!`);
+                            return;
                         }
+                    }
 
-                        // Start jalankan soal ujian pertama (index 0)
-                        indeksUjianAktif.value = 0;
-                        skorUjianBenar.value = 0;
-                        dataSoalUjianAktif.value = bankSoalUjian.value[0];
-                        kunciTerbukaUjian.value = false;
-                        layarAktif.value = 'ujian_soal';
+                    sedangLoading.value = true;
+                    teksLoading.value = "Menyimpan konfigurasi & mendownload materi kustom...";
+                    bankSoalUjian.value = {};
+                    nomorHangusUjian.value = [];
 
-                    } catch (e) { alert("Gagal menyiapkan materi ujian. Cek koneksi internet."); } finally { sedangLoading.value = false; }
+                    try {
+                        // Looping pararel per baris setting untuk mengambil data mufradat dari Quran.com
+                        const fetchPromises = listConfigSoalUjian.value.map(async (row, index) => {
+                            const infoSurahRef = listSurahJuz30.value.find(s => s.id === row.surahId);
+                            const url = `https://api.quran.com/api/v4/verses/by_chapter/${row.surahId}?language=id&words=true&word_fields=text_uthmani&per_page=150`;
+                            const data = await fetch(url).then(res => res.json());
+
+                            // Saring murni hanya di rentang ayat yang disetting user pada baris ini
+                            let ayatTerfilter = data.verses.filter(v => 
+                                v.verse_number >= row.ayatMulai && v.verse_number <= row.ayatSelesai
+                            );
+
+                            let kumpulanAyatBlokData = ayatTerfilter.map(v => {
+                                let listWordsOlah = v.words
+                                    .filter(w => w.char_type_name === 'word')
+                                    .map(w => ({
+                                        arabic: w.text_uthmani,
+                                        translation: w.translation.text.replace(/<\/?[^>]+(>|$)/g, "")
+                                    }));
+                                return {
+                                    verseNumber: v.verse_number,
+                                    verseNumberArab: keAngkaArab(v.verse_number),
+                                    words: listWordsOlah
+                                }
+                            });
+
+                            // Masukkan ke index nomor kotak (1-based index)
+                            bankSoalUjian.value[index + 1] = {
+                                surahName: infoSurahRef ? infoSurahRef.name : "Surah",
+                                startVerse: row.ayatMulai,
+                                endVerse: row.ayatSelesai,
+                                listAyatData: kumpulanAyatBlokData
+                            };
+                        });
+
+                        await Promise.all(fetchPromises);
+                        // Lempar ke layar dashboard kotak ujian kustom
+                        layarAktif.value = 'ujian_dashboard';
+
+                    } catch (e) {
+                        alert("Gagal memproses data ujian kustom. Coba periksa koneksi internet Anda.");
+                    } finally {
+                        sedangLoading.value = false;
+                    }
                 };
 
-                const jawabUjian = (apakahBenar) => {
-                    if (apakahBenar) skorUjianBenar.value++;
-                    
-                    // Cek kelanjutan nomor soal
-                    if (indeksUjianAktif.value + 1 < bankSoalUjian.value.length) {
-                        indeksUjianAktif.value++;
-                        dataSoalUjianAktif.value = bankSoalUjian.value[indeksUjianAktif.value];
-                        kunciTerbukaUjian.value = false;
-                    } else {
-                        // Jika sudah soal terakhir, arahkan ke lembar raport nilai
-                        layarAktif.value = 'ujian_hasil';
-                    }
+                const pilihNomorUjian = (no) => {
+                    if (!bankSoalUjian.value[no]) return;
+                    nomorTerpilihUjian.value = no;
+                    nomorHangusUjian.value.push(no);
+                    dataSoalUjianAktif.value = bankSoalUjian.value[no];
+                    kunciTerbukaUjian.value = false;
+                    layarAktif.value = 'ujian_soal';
                 };
 
                 // Helper konversi angka arab
@@ -560,7 +561,7 @@
                     // Latihan refs/funcs
                     tampilkanModalLatihan, surahTerpilihIds, bankSoal, nomorTerpilihLatihan, nomorHangusLatihan, dataSoalAktif, kunciTerbuka, teksRingkasanSurah, listKataFlat, masukModeLatihan, pilihSemuaSurah, kosongkanSemuaSurah, muatDataMateriLatihan, pilihNomorLatihan, resetLatihan,
                     // Ujian refs/funcs
-                    configUjian, bankSoalUjian, indeksUjianAktif, skorUjianBenar, dataSoalUjianAktif, kunciTerbukaUjian, listKataUjianFlat, nilaiUjian, predikatKelulusan, masukModeUjian, sinkronisasiBatasAyatUjian, generateMateriUjian, jawabUjian
+                    jumlahSoalUjian, listConfigSoalUjian, bankSoalUjian, nomorTerpilihUjian, nomorHangusUjian, dataSoalUjianAktif, kunciTerbukaUjian, listKataUjianFlat, onSurahUjianRowChange, generateMateriUjianKustom, pilihNomorUjian
                 }
             }
         }).mount('#app');
