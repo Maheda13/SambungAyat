@@ -132,26 +132,26 @@
         <div v-if="layarAktif === 'ujian_config'" class="w-full max-w-2xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-6">
             <div>
                 <button @click="layarAktif = 'pembuka'" class="text-xs font-bold text-slate-500 hover:text-emerald-600 mb-1 block">&larr; Kembali Menu Utama</button>
-                <h2 class="text-2xl font-bold text-slate-900">⏱ nighttime Paket Ujian Kustom</h2>
-                <p class="text-xs text-slate-500">Tentukan kuantitas soal, lalu isi detail surah serta rentang materi ayat pada masing-masing kotak.</p>
+                <h2 class="text-2xl font-bold text-slate-900">⏱ Setup Pertanyaan</h2>
+                <p class="text-xs text-slate-500">Tentukan jumlah soal, kemudian isi detail surah serta rentang materi ayat pada masing-masing kotak.</p>
             </div>
 
             <!-- Langkah 1: Pilih Jumlah Soal -->
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase">1. Tentukan Jumlah Kotak Soal:</label>
-                    <span class="text-[11px] text-slate-400 font-medium">Batas minimal 1 soal, maksimal hingga 10 soal sekaligus.</span>
+                    <label class="block text-xs font-bold text-slate-700 uppercase">1. Jumlah Soal:</label>
+                    <span class="text-[11px] text-slate-400 font-medium">Batas minimal 1 soal, maksimal 10 soal.</span>
                 </div>
                 <input type="number" v-model.number="jumlahSoalUjian" :min="1" :max="10" class="w-24 p-2.5 bg-white border border-slate-300 rounded-xl text-center font-bold text-lg text-emerald-700 focus:outline-emerald-500 shadow-xs">
             </div>
 
             <!-- Langkah 2: Render Dynamic Inputs Form Row -->
             <div class="space-y-4 max-h-96 overflow-y-auto custom-scroll pr-1">
-                <label class="block text-xs font-bold text-slate-600 uppercase">2. Konfigurasi Urutan Soal (Akan Diacak Otomatis):</label>
+                <label class="block text-xs font-bold text-slate-600 uppercase">2. Konfigurasi Soal :</label>
                 
                 <div v-for="(row, idx) in listConfigSoalUjian" :key="idx" class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 relative hover:border-emerald-400 transition">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">Konfigurasi Soal #{{ idx + 1 }}</span>
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">Soal #{{ idx + 1 }}</span>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -175,7 +175,7 @@
 
             <!-- Langkah 3: Simpan Setting -->
             <button @click="generateMateriUjianKustom" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition tracking-wide text-sm cursor-pointer">
-                💾 Simpan Pengaturan & Buka Dashboard Ujian
+                💾 Mulai Ujian
             </button>
         </div>
 
@@ -188,12 +188,12 @@
                     <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">⏱️ Dashboard Ujian Kustom</h1>
                 </div>
                 <button @click="layarAktif = 'ujian_config'" class="p-3 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer">
-                    ⚙️ Ubah Cakupan Ayat
+                    ⚙️ Pengaturan
                 </button>
             </div>
 
             <div class="bg-emerald-50 text-emerald-900 p-4 rounded-xl mb-6 text-xs border border-emerald-100 shadow-sm font-medium">
-                Sistem ujian kustom aktif. Posisi materi soal di bawah ini **telah diacak otomatis** oleh sistem. Silakan buka kotak rahasia untuk menguji hafalan Anda.
+                Silakan pilih salah satu kotak untuk menguji hafalan Anda.
             </div>
 
             <!-- Grid Menggunakan Nomor Saja Tanpa Keterangan "Soal" (Meniru Desain Mode Latihan) -->
@@ -234,7 +234,7 @@
 
                     <div v-if="!kunciTerbukaUjian" class="pt-4">
                         <button @click="kunciTerbukaUjian = true" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg cursor-pointer">
-                            📖 Tampilkan Teks Al-Qur'an & Terjemah Kata
+                            📖 Tampilkan Potongan ayat & Terjemah Kata
                         </button>
                     </div>
 
