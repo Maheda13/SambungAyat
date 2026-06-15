@@ -41,10 +41,11 @@
         <!-- LAYAR 1: HALAMAN PEMBUKA / MULAI UJIAN -->
         <div v-if="layarAktif === 'pembuka'" class="w-full max-w-xl mx-auto text-center space-y-8 py-12">
             <div class="space-y-3">
-                <span class="px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider">Mode Ujian Hafalan</span>
-                <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Mufradat Qur'an <span class="text-emerald-600">Juz 30</span></h1>
+                <span class="px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider">Tes Hafalan</span>
+                <p></p>
+                <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Terjemah per Kata Qur'an <span class="text-emerald-600">Juz 30</span></h1>
                 <p class="text-slate-500 text-sm leading-relaxed">
-                    Uji hafalan terjemahan per kata melalui sistem 10 kotak misteri acak. Daftar surah dan target ayat telah ditentukan secara khusus oleh sistem untuk menguji kekuatan ingatan Anda.
+                    Uji hafalan terjemahan per kata dengan sistem 10 kotak misteri acak.
                 </p>
             </div>
 
@@ -59,7 +60,7 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <button @click="layarAktif = 'pembuka'" class="text-xs font-bold text-slate-500 hover:text-emerald-600 mb-1 block">&larr; Keluar Ujian</button>
-                    <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">⏱️ Dashboard Kotak Ujian</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Silakan Pilih salah satu kotak berikut: </h1>
                 </div>
                 <button @click="resetUjianTotal" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer flex items-center gap-1">
                     🔄 Acak Ulang Posisi
@@ -67,7 +68,7 @@
             </div>
 
             <div class="bg-emerald-50 text-emerald-900 p-4 rounded-xl mb-6 text-xs border border-emerald-100 shadow-sm font-medium">
-                Sistem telah mengacak posisi ke-10 paket soal ke dalam nomor kotak di bawah ini. Silakan pilih nomor secara bebas untuk memulai pengujian hafalan.
+                Silakan pilih nomor secara bebas untuk memulai pengujian hafalan.
             </div>
 
             <!-- Grid 10 Soal Responsif -->
@@ -104,7 +105,7 @@
                 <div class="text-center w-full max-w-4xl mx-auto space-y-6">
                     <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 max-w-xl mx-auto shadow-xs">
                         <h3 class="text-xl font-bold text-slate-800">Surah {{ dataSoalUjianAktif.surahName }}</h3>
-                        <p class="text-xs font-semibold text-slate-500 mt-0.5">Rentang Ayat Teruji: Ayat {{ dataSoalUjianAktif.startVerse }} sampai {{ dataSoalUjianAktif.endVerse }}</p>
+                        <p class="text-xs font-semibold text-slate-800 mt-0.5">Ayat {{ dataSoalUjianAktif.startVerse }} sampai {{ dataSoalUjianAktif.endVerse }}</p>
                     </div>
 
                     <!-- Tombol Reveal atau Pilihan Jenis Font -->
