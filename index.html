@@ -33,7 +33,7 @@
         
         <!-- Global Loading Screen -->
         <div v-if="sedangLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-4 z-50 text-white text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-red-500 border-t-transparent mb-4"></div>
             <p class="font-semibold text-lg">{{ teksLoading }}</p>
             <p class="text-xs text-slate-300 mt-1">Sistem sedang memproses database kata Quran.com v4...</p>
         </div>
@@ -41,15 +41,15 @@
         <!-- LAYAR 1: HALAMAN PEMBUKA / MULAI UJIAN -->
         <div v-if="layarAktif === 'pembuka'" class="w-full max-w-xl mx-auto text-center space-y-8 py-12">
             <div class="space-y-3">
-                <span class="px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider">Tes Hafalan</span>
+                <span class="px-4 py-1.5 bg-red-100 text-red-800 rounded-full text-xs font-bold uppercase tracking-wider">Tes Hafalan</span>
                 <p></p>
-                <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Terjemah per Kata Qur'an <span class="text-emerald-600">Juz 30</span></h1>
+                <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Terjemah per Kata Qur'an <span class="text-red-600">Juz 30</span></h1>
                 <p class="text-slate-500 text-sm leading-relaxed">
                     Uji hafalan terjemahan per kata dengan sistem 10 kotak acak.
                 </p>
             </div>
 
-            <button @click="generateMateriUjianKustom" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-emerald-600/20 transition cursor-pointer tracking-wide text-base">
+            <button @click="generateMateriUjianKustom" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-red-600/20 transition cursor-pointer tracking-wide text-base">
                 ⏱️ Mulai Ujian
             </button>
         </div>
@@ -59,14 +59,14 @@
         <div v-if="layarAktif === 'ujian_dashboard'" class="w-full flex-1 flex flex-col py-4 justify-between">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Silakan Pilih salah satu kotak berikut: </h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-red-700">Silakan Pilih salah satu kotak berikut: </h1>
                 </div>
                 <button @click="resetUjianTotal" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl shadow-sm hover:bg-slate-50 transition cursor-pointer flex items-center gap-1">
                     🗘 Acak Soal
                 </button>
             </div>
 
-            <div class="bg-emerald-50 text-emerald-900 p-4 rounded-xl mb-6 text-xs border border-emerald-100 shadow-sm font-medium">
+            <div class="bg-red-50 text-red-900 p-4 rounded-xl mb-6 text-xs border border-red-100 shadow-sm font-medium">
                 Silakan pilih nomor secara bebas untuk memulai pengujian hafalan.
             </div>
 
@@ -81,7 +81,7 @@
                         'h-28 text-3xl font-bold rounded-2xl transition flex flex-col items-center justify-center shadow-sm relative overflow-hidden group', 
                         nomorHangusUjian.includes(no) 
                             ? 'bg-slate-200 text-slate-400 cursor-not-allowed border-2 border-transparent opacity-70' 
-                            : 'bg-white border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white active:scale-95 cursor-pointer'
+                            : 'bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white active:scale-95 cursor-pointer'
                     ]"
                 >
                     <span class="text-xs font-bold uppercase tracking-wider opacity-60 mb-1 text-[10px]">Kotak</span>
@@ -97,25 +97,25 @@
                 <button @click="layarAktif = 'ujian_dashboard'" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm flex items-center gap-2 shadow-sm cursor-pointer">
                     ← Pilih Soal Kembali
                 </button>
-                <h2 class="text-lg font-bold text-emerald-700 bg-white px-5 py-2.5 rounded-xl border border-emerald-200 shadow-sm">Pertanyaan no. #{{ nomorTerpilihUjian }}</h2>
+                <h2 class="text-lg font-bold text-red-700 bg-white px-5 py-2.5 rounded-xl border border-red-200 shadow-sm">Pertanyaan no. #{{ nomorTerpilihUjian }}</h2>
             </div>
 
             <div class="bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-12 flex-1 flex flex-col justify-center space-y-8">
                 <div class="text-center w-full max-w-4xl mx-auto space-y-6">
-                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 max-w-xl mx-auto shadow-xs">
+                    <div class="bg-red-50 border border-red-100 rounded-2xl p-4 max-w-xl mx-auto shadow-xs">
                         <h3 class="text-xl font-bold text-slate-800">Surah {{ dataSoalUjianAktif.surahName }}</h3>
                         <p class="text-xs font-semibold text-slate-800 mt-0.5">Ayat {{ dataSoalUjianAktif.startVerse }} sampai {{ dataSoalUjianAktif.endVerse }}</p>
                     </div>
 
                     <!-- Tombol Reveal atau Pilihan Jenis Font -->
                     <div class="flex justify-center items-center gap-4 flex-wrap">
-                        <button v-if="!kunciTerbukaUjian" @click="kunciTerbukaUjian = true" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg cursor-pointer transition">
+                        <button v-if="!kunciTerbukaUjian" @click="kunciTerbukaUjian = true" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg cursor-pointer transition">
                             📖 Buka Potongan Ayat & Terjemah Per Kata
                         </button>
                         
                         <div v-if="kunciTerbukaUjian" class="flex gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
-                            <button @click="fontTerpilih = 'font-madinah'" :class="['px-3 py-1.5 rounded-lg transition', fontTerpilih === 'font-madinah' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-500']">Mushaf Madinah</button>
-                            <button @click="fontTerpilih = 'font-amiri'" :class="['px-3 py-1.5 rounded-lg transition', fontTerpilih === 'font-amiri' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-500']">Amiri</button>
+                            <button @click="fontTerpilih = 'font-madinah'" :class="['px-3 py-1.5 rounded-lg transition', fontTerpilih === 'font-madinah' ? 'bg-white text-red-700 shadow-xs' : 'text-slate-500']">Mushaf Madinah</button>
+                            <button @click="fontTerpilih = 'font-amiri'" :class="['px-3 py-1.5 rounded-lg transition', fontTerpilih === 'font-amiri' ? 'bg-white text-red-700 shadow-xs' : 'text-slate-500']">Amiri</button>
                         </div>
                     </div>
 
@@ -130,7 +130,7 @@
                                 </div>
                                 <!-- Bulatan Nomor Ayat -->
                                 <div v-else-if="item.jenis === 'nomor_ayat'" class="flex items-center justify-center px-1 self-center">
-                                    <span :class="[fontTerpilih, 'text-xl md:text-2xl text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-xl shadow-xs']">﴿{{ item.angkaArab }}﴾</span>
+                                    <span :class="[fontTerpilih, 'text-xl md:text-2xl text-red-600 font-bold bg-red-50 border border-red-100 px-2.5 py-1 rounded-xl shadow-xs']">﴿{{ item.angkaArab }}﴾</span>
                                 </div>
                             </template>
                         </div>
