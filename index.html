@@ -114,14 +114,14 @@
                 <button @click="layarAktif = 'ujian_dashboard'" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm flex items-center gap-2 shadow-sm cursor-pointer">
                     ← Pilih Soal Kembali
                 </button>
-                <h2 class="text-lg font-bold text-red-700 bg-white px-5 py-2.5 rounded-xl border border-red-200 shadow-sm">Pertanyaan no. #{{ nomorTerpilihUjian }}</h2>
+                <h2 class="text-lg font-bold text-red-700 bg-white px-5 py-2.5 rounded-xl border border-red-200 shadow-sm">Pertanyaan #{{ nomorTerpilihUjian }}</h2>
             </div>
 
             <div class="bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-12 flex-1 flex flex-col justify-center space-y-8">
                 <div class="text-center w-full max-w-4xl mx-auto space-y-6">
                     <div class="bg-red-50 border border-red-100 rounded-2xl p-4 max-w-xl mx-auto shadow-xs">
                         <h3 class="text-xl font-bold text-slate-800">Surah {{ dataSoalUjianAktif.surahName }}</h3>
-                        <p class="text-xs font-semibold text-slate-800 mt-0.5">Ayat {{ dataSoalUjianAktif.startVerse }} sampai {{ dataSoalUjianAktif.endVerse }}</p>
+                        <p class="text-xs font-semibold text-slate-800 mt-0.8">Ayat {{ dataSoalUjianAktif.startVerse }} sampai {{ dataSoalUjianAktif.endVerse }}</p>
                     </div>
 
                     <!-- Tombol Reveal atau Pilihan Jenis Font -->
