@@ -154,18 +154,9 @@
 
                 // --- MASTER ARSIP JUZ 30 ---
                 const listSurahJuz30 = ref([
-                    { id: 78, name: 'An-Naba\'' }, { id: 79, name: 'An-Nazi\'at' }, { id: 80, name: '\'Abasa' },
-                    { id: 81, name: 'At-Takwir' }, { id: 82, name: 'Al-Infitar' }, { id: 83, name: 'Al-Mutaffifin' },
-                    { id: 84, name: 'Al-Inshiqaq' }, { id: 85, name: 'Al-Buruj' }, { id: 86, name: 'At-Tariq' },
-                    { id: 87, name: 'Al-A\'la' }, { id: 88, name: 'Al-Ghashiyah' }, { id: 89, name: 'Al-Fajr' },
-                    { id: 90, name: 'Al-Balad' }, { id: 91, name: 'Ash-Shams' }, { id: 92, name: 'Al-Layl' },
-                    { id: 93, name: 'Ad-Duha' }, { id: 94, name: 'Ash-Sharh' }, { id: 95, name: 'At-Tin' },
-                    { id: 96, name: 'Al-\'Alaq' }, { id: 97, name: 'Al-Qadr' }, { id: 98, name: 'Al-Bayyinah' },
-                    { id: 99, name: 'Az-Zalzalah' }, { id: 100, name: 'Al-\'Adiyat' }, { id: 101, name: 'Al-Qari\'ah' },
-                    { id: 102, name: 'At-Takathur' }, { id: 103, name: 'Al-\'Asr' }, { id: 104, name: 'Al-Humazah' },
-                    { id: 105, name: 'Al-Fil' }, { id: 106, name: 'Quraysh' }, { id: 107, name: 'Al-Ma\'un' },
-                    { id: 108, name: 'Al-Kawthar' }, { id: 109, name: 'Al-Kafirun' }, { id: 110, name: 'An-Nasr' },
-                    { id: 111, name: 'Al-Masad' }, { id: 112, name: 'Al-Ikhlas' }, { id: 113, name: 'Al-Falaq' },
+                    { id: 78, name: 'An-Naba\'' }, { id: 79, name: 'An-Nazi\'at' }, { id: 83, name: 'Al-Muthaffifin' },
+                    { id: 84, name: 'Al-Insyiqaq' }, { id: 95, name: 'At-Tin' }, { id: 96, name: 'Al-\'Alaq' }, 
+                    { id: 103, name: 'Al-\'Asr' }, { id: 108, name: 'Al-Kautsar' },  { id: 112, name: 'Al-Ikhlas' },
                     { id: 114, name: 'An-Nas' }
                 ]);
 
@@ -180,16 +171,16 @@
                 // ============================================
                 // Anda bisa mengganti surahId, ayatMulai, & ayatSelesai di bawah ini kapan saja
                 const listConfigSoalUjian = ref([
-                    { surahId: 78, ayatMulai: 1, ayatSelesai: 5 },  // Soal 1
-                    { surahId: 79, ayatMulai: 1, ayatSelesai: 5 },  // Soal 2
-                    { surahId: 81, ayatMulai: 1, ayatSelesai: 5 },  // Soal 3
-                    { surahId: 82, ayatMulai: 1, ayatSelesai: 5 },  // Soal 4
-                    { surahId: 87, ayatMulai: 1, ayatSelesai: 5 },  // Soal 5
-                    { surahId: 88, ayatMulai: 1, ayatSelesai: 5 },  // Soal 6
-                    { surahId: 91, ayatMulai: 1, ayatSelesai: 5 },  // Soal 7
-                    { surahId: 93, ayatMulai: 1, ayatSelesai: 5 },  // Soal 8
-                    { surahId: 95, ayatMulai: 1, ayatSelesai: 5 },  // Soal 9
-                    { surahId: 107, ayatMulai: 1, ayatSelesai: 4 }  // Soal 10
+                    { surahId: 78, ayatMulai: 31, ayatSelesai: 35 },  // Soal 1
+                    { surahId: 79, ayatMulai: 37, ayatSelesai: 41 },  // Soal 2
+                    { surahId: 83, ayatMulai: 22, ayatSelesai: 26 },  // Soal 3
+                    { surahId: 84, ayatMulai: 7, ayatSelesai: 9 },  // Soal 4
+                    { surahId: 95, ayatMulai: 1, ayatSelesai: 8 },  // Soal 5
+                    { surahId: 96, ayatMulai: 1, ayatSelesai: 5 },  // Soal 6
+                    { surahId: 103, ayatMulai: 1, ayatSelesai: 3 },  // Soal 7
+                    { surahId: 108, ayatMulai: 1, ayatSelesai: 3 },  // Soal 8
+                    { surahId: 112, ayatMulai: 1, ayatSelesai: 4 },  // Soal 9
+                    { surahId: 114, ayatMulai: 1, ayatSelesai: 6 }  // Soal 10
                 ]);
 
                 // State managemen jalannya ujian
